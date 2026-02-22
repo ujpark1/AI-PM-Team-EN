@@ -90,6 +90,7 @@ AI PM Team/
 │   ├── agent-b-analyst.md              # B 역할 정의 + AI 프롬프트
 │   └── agent-c-director.md             # C 역할 정의 + AI 프롬프트
 ├── knowledge/
+│   ├── knowledge-shared-fundamentals.md # 공통 지식 베이스 (23개 PM 핵심 개념)
 │   ├── knowledge-a-strategist.md       # A의 지식 베이스 (시장분석, 아이디어 발굴)
 │   ├── knowledge-b-analyst.md          # B의 지식 베이스 (검증, 데이터 분석)
 │   └── knowledge-c-director.md         # C의 지식 베이스 (의사결정, GTM, 성장)
