@@ -34,6 +34,37 @@
 - [x] **UX Writing** — 랜딩페이지 카피 개선 (전문 용어 제거, 사용자 혜택 중심 재작성) + UX Writing Updates.md 생성
 - [x] **문서 동기화** — UX Writing 변경 반영: feature-spec, implementation-plan, figma-review 업데이트
 
+### 2026-02-23 (Phase 2 — 백엔드 + 실제 동작)
+
+- [x] **Phase 2 Step 0** — Supabase 인프라 세팅
+  - Supabase 프로젝트 생성 (유료 플랜)
+  - DB 스키마 6개 테이블 마이그레이션 (`001_initial_schema.sql`)
+  - RLS 정책 설정 (user_id 기반)
+  - Auth Trigger (auth.users → profiles 자동 생성)
+  - 환경변수 설정 (.env.local + Vercel)
+- [x] **Phase 2 Step 1** — Auth (회원가입/로그인/인증)
+  - Supabase SSR 클라이언트 (`client.ts`, `server.ts`)
+  - Auth 미들웨어 (보호 라우트)
+  - Login/Signup → 실제 Supabase Auth 연동
+  - 이메일 인증 (verify-email 화면 + confirm 콜백)
+  - 비밀번호 찾기/재설정 (forgot-password + reset-password + reset-callback)
+  - OAuth 콜백 라우트
+  - Supabase Site URL + Redirect URLs 설정
+- [x] **Phase 2 Step 2** — 프로젝트 CRUD + Project Key
+  - API: GET/POST `/api/projects`, PATCH/DELETE `/api/projects/[id]`
+  - Project Key: `gr_sk_` + 32자 랜덤, SHA-256 해시 저장
+  - Free 플랜 3개 제한 체크
+  - Key 재발급 API (`/api/projects/[id]/regenerate-key`)
+- [x] **Phase 2 Step 9 (부분)** — Dashboard 실제 데이터 연결
+  - `UserProvider` — Supabase Auth user + profiles 테이블 Context
+  - `ProjectProvider` — 프로젝트 목록 + 현재 선택 Context
+  - 사이드바 전체 → 실제 데이터 (유저 정보, 프로젝트 목록, 플랜, 로그아웃)
+  - New Project Dialog → POST /api/projects 실제 생성
+  - Settings (Account Info, Change Password, Delete Account) → 실제 Supabase 연동
+  - Dashboard 상태 분기 → 실제 프로젝트 기반
+  - Vercel 배포 완료 (`https://guardrail-seven.vercel.app`)
+- [x] **버그 수정** — 프로필 이름 저장 실패 (DB 컬럼 `name` vs 코드 `full_name` 불일치)
+
 ---
 
 ## 구현 완료 컴포넌트 목록
@@ -102,15 +133,55 @@
 | 경로 | 파일 | 설명 |
 |------|------|------|
 | `/` | `page.tsx` | Landing Page |
-| `/login` | `login/page.tsx` | Login |
-| `/signup` | `signup/page.tsx` | Sign Up |
-| `/dashboard` | `(dashboard)/dashboard/page.tsx` | Overview |
+| `/login` | `login/page.tsx` | Login (Supabase Auth 연동) |
+| `/signup` | `signup/page.tsx` | Sign Up (Supabase Auth 연동) |
+| `/dashboard` | `(dashboard)/dashboard/page.tsx` | Overview (실제 프로젝트 데이터) |
 | `/project/[id]/scan/[scanId]` | 해당 `page.tsx` | Scan Result |
 | `/project/[id]/scans` | 해당 `page.tsx` | Scans History |
 | `/project/[id]/settings` | 해당 `page.tsx` | Project Settings |
-| `/settings/profile` | 해당 `page.tsx` | Profile Settings |
+| `/settings/profile` | 해당 `page.tsx` | Profile Settings (실제 프로필 수정) |
 | `/settings/billing` | 해당 `page.tsx` | Plan & Billing |
-| `(dashboard)` | `layout.tsx` | 대시보드 공통 레이아웃 |
+| `(dashboard)` | `layout.tsx` | 대시보드 레이아웃 (UserProvider + ProjectProvider) |
+
+### Auth (`src/app/auth/`)
+| 경로 | 파일 | 설명 |
+|------|------|------|
+| `/auth/callback` | `callback/route.ts` | OAuth 콜백 처리 |
+| `/auth/confirm` | `confirm/route.ts` | 이메일 인증 콜백 |
+| `/auth/reset-callback` | `reset-callback/route.ts` | 비밀번호 재설정 콜백 |
+| `/auth/forgot-password` | `forgot-password/page.tsx` | 비밀번호 찾기 화면 |
+| `/auth/reset-password` | `reset-password/page.tsx` | 비밀번호 재설정 화면 |
+| `/auth/verify-email` | `verify-email/page.tsx` | 이메일 인증 대기 화면 |
+
+### API (`src/app/api/`)
+| 경로 | 메서드 | 설명 |
+|------|--------|------|
+| `/api/projects` | GET, POST | 프로젝트 목록 조회, 생성 (Free 3개 제한) |
+| `/api/projects/[id]` | PATCH, DELETE | 프로젝트 수정, 삭제 (소유권 검증) |
+| `/api/projects/[id]/regenerate-key` | POST | Project Key 재발급 |
+
+### Providers (`src/providers/`)
+| 파일 | 설명 |
+|------|------|
+| `user-provider.tsx` | Supabase Auth user + profiles Context |
+| `project-provider.tsx` | 프로젝트 목록 + 현재 선택 Context |
+
+### Supabase (`src/lib/supabase/`)
+| 파일 | 설명 |
+|------|------|
+| `client.ts` | 브라우저용 Supabase 클라이언트 |
+| `server.ts` | 서버용 Supabase 클라이언트 (쿠키 기반) |
+| `middleware.ts` | Auth 세션 갱신 유틸 |
+
+### Middleware
+| 파일 | 설명 |
+|------|------|
+| `src/middleware.ts` | Auth 미들웨어 (보호 라우트 체크) |
+
+### DB Migration
+| 파일 | 설명 |
+|------|------|
+| `supabase/migrations/001_initial_schema.sql` | 6개 테이블 + RLS + Auth Trigger |
 
 ---
 
@@ -138,6 +209,8 @@
 |------|-------------|------|
 | `guardrail-ux-spec.md` | 2026-02-23 | 구현 반영 완료 (섹션 9.4, 13, 14, Changelog) |
 | `guardrail-feature-spec.md` | 2026-02-23 | 구현 반영 완료 (F2, Screen 6, PM-Dev 테이블) |
-| `guardrail-implementation-plan.md` | 2026-02-23 | 구현 현황 + 차이점 섹션 추가 |
+| `guardrail-implementation-plan.md` | 2026-02-23 | Phase 2 구현 현황 업데이트 (Step 0~2, Step 9 부분 완료 + 버그 수정 기록) |
 | `figma-review-28frames.md` | 2026-02-23 | 섹션 6 (구현 대비 차이점) 추가 |
 | `guardrail-feature-spec.md` (root) | 2026-02-23 | GitHub OAuth + Profile OAuth 정책 포함 |
+| `progress.md` | 2026-02-23 | Phase 2 타임라인 + 컴포넌트 목록 업데이트 |
+| `Updates.md` | 2026-02-23 | Phase 2 주요 업데이트 기록 추가 |

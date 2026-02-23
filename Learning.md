@@ -24,3 +24,16 @@
 **교훈:**
 - 에이전트에게 리서치를 위임할 때, 결과물의 저장 위치를 명확히 지정할 것
 - 중요한 리뷰 결과는 프로젝트 내 관리 가능한 위치에 저장할 것
+
+---
+
+## #3. DB 스키마 컬럼명과 코드 불일치 (2026-02-23)
+
+**실수:** DB 마이그레이션에서 `profiles` 테이블의 컬럼을 `name`으로 정의했는데, 프론트엔드 코드(`user-provider.tsx`, `account-info.tsx`, `sidebar-user-footer.tsx`)에서는 `full_name`으로 참조. Supabase Auth의 `user_metadata.full_name`과 profiles 테이블의 `name` 컬럼이 혼동됨.
+
+**원인:** Supabase Auth의 `raw_user_meta_data` → `full_name` 키와 profiles 테이블의 `name` 컬럼명이 달랐는데, 코드 작성 시 Auth 메타데이터 키와 DB 컬럼명을 구분하지 않고 동일하게 `full_name`으로 사용함.
+
+**교훈:**
+- DB 스키마 작성 후 코드에서 참조할 때, 마이그레이션 SQL의 정확한 컬럼명을 확인할 것
+- Supabase Auth 메타데이터 필드명(`user_metadata.full_name`)과 자체 테이블 컬럼명(`profiles.name`)은 별개 — 혼동 주의
+- 새 Provider/API 작성 시 Supabase select/update 쿼리의 컬럼명을 스키마와 교차 검증할 것

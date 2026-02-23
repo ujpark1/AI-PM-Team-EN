@@ -1,4 +1,4 @@
-# GuardRail Phase 1 — 전체 구현 계획
+# GuardRail 전체 구현 계획 (Phase 1 & 2)
 
 ## Context
 
@@ -541,3 +541,855 @@ Figma 원안의 하드코딩 HEX 대신 CSS Custom Properties 기반 시스템 �
 | Figma 28프레임 리뷰 | `AI-PM-Team/outputs/figma-review-28frames.md` |
 | Learning (시행착오) | `AI-PM-Team/Learning.md` |
 | Progress (진행 상황) | `AI-PM-Team/progress.md` |
+
+---
+---
+
+# GuardRail Phase 2 — 백엔드 + 실제 동작 구현 계획
+
+## Context
+
+Phase 1에서 **목 데이터 기반 UI 전체**를 완성했다. Phase 2는 앱을 실제로 동작하게 만드는 단계:
+- Auth 백엔드 (회원가입/로그인/세션)
+- DB 연동 (모든 mock data → 실제 데이터)
+- 보안 스캔 엔진 (핵심 기능)
+- MCP 서버 + SDK 모니터링 (외부 연동)
+- 결제 시스템 (Pro 플랜)
+- 배포 + 법적 문서
+
+**알림 시스템(F11)은 Phase 3으로 이관.**
+
+**스택 추가:** Supabase (DB + Auth) + Stripe (결제) + Resend (이메일, Phase 3) + Vercel (배포 + Cron)
+
+---
+
+## 구현 순서 (12 Steps)
+
+### Step 0: 인프라 세팅
+
+**Supabase 프로젝트 생성:**
+- Database (PostgreSQL)
+- Auth (이메일+비밀번호, Google OAuth, GitHub OAuth)
+- Row Level Security (RLS) 정책
+
+**DB 스키마 (6개 테이블):**
+
+```sql
+-- User (Supabase Auth 내장 + 확장)
+-- Supabase auth.users 자동 생성 + public.profiles 테이블로 확장
+profiles
+├── id (uuid, FK → auth.users)
+├── name
+├── avatar_url
+├── provider (email / google / github)
+├── github_access_token (encrypted, nullable)
+├── github_username (nullable)
+├── github_avatar_url (nullable)
+├── github_connected_at (datetime, nullable)
+├── plan (free / pro, default: free)
+├── stripe_customer_id (nullable)
+├── created_at
+
+-- Project
+projects
+├── id (uuid)
+├── user_id (FK → profiles)
+├── name
+├── url (nullable)
+├── github_repo (nullable — "owner/repo" 또는 full URL)
+├── github_repo_id (number, nullable)
+├── github_repo_private (boolean)
+├── project_key_hash (hashed)
+├── project_key_prefix (gr_sk_xxxx, 표시용)
+├── monitoring_enabled (boolean, default true)
+├── sdk_connected (boolean, default false)
+├── created_at
+
+-- Scan
+scans
+├── id (uuid)
+├── project_id (FK → projects)
+├── source (web / mcp / auto)
+├── target_url
+├── grade (A~F)
+├── total_checks
+├── passed_checks
+├── failed_checks
+├── created_at
+
+-- ScanItem
+scan_items
+├── id (uuid)
+├── scan_id (FK → scans)
+├── category (payment / auth / secrets / infra / legal)
+├── check_key (stripe_key_exposed 등)
+├── status (pass / fail / warn)
+├── title_user
+├── description_user
+├── fix_guide (마크다운)
+
+-- MonitoringLog
+monitoring_logs
+├── id (uuid)
+├── project_id (FK → projects)
+├── type (uptime / ssl / header / runtime_event)
+├── status (ok / warning / critical)
+├── message
+├── metadata (jsonb)
+├── created_at
+
+-- RuntimeEvent (SDK에서 수신)
+runtime_events
+├── id (uuid)
+├── project_id (FK → projects)
+├── event_type (auth.login_failed / auth.login_success / api.request)
+├── ip_address
+├── geo_country
+├── user_agent
+├── metadata (jsonb)
+├── created_at
+```
+
+**환경변수 (.env.local):**
+```
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+GITHUB_CLIENT_ID=
+GITHUB_CLIENT_SECRET=
+STRIPE_SECRET_KEY=
+STRIPE_WEBHOOK_SECRET=
+STRIPE_PRO_PRICE_ID=
+ENCRYPTION_KEY=          # GitHub token AES-256 암호화용
+```
+
+**API Rate Limiting:**
+- 스캔 API: 분당 5회
+- 이벤트 수집 API: 분당 100회
+- 일반 API: 분당 60회
+
+**CORS 설정:**
+- `guardrail-sdk` → 우리 API 호출 허용
+- `guardrail-mcp` → 우리 API 호출 허용
+
+---
+
+### Step 1: F1 — 회원가입/로그인 (Auth)
+
+**Supabase Auth 연동:**
+
+| 방법 | 구현 |
+|------|------|
+| 이메일+비밀번호 | `supabase.auth.signUp()`, `supabase.auth.signInWithPassword()` |
+| Google OAuth | `supabase.auth.signInWithOAuth({ provider: 'google' })` |
+| GitHub OAuth | `supabase.auth.signInWithOAuth({ provider: 'github' })` |
+
+**세션 관리:**
+- Supabase `getSession()` + `onAuthStateChange()`
+- 미들웨어에서 보호 라우트 체크 (`/dashboard/*`, `/project/*`, `/settings/*`)
+- 미인증 시 `/login`으로 리다이렉트
+
+**이메일 인증 (Email Verification):**
+- 이메일+비밀번호 가입 시 Supabase가 인증 메일 자동 발송
+- 인증 완료 전 대시보드 접근 차단
+- "이메일을 확인하세요" 안내 화면 필요
+
+**비밀번호 찾기 (Forgot Password):**
+- Login 페이지 "Forgot password?" 링크 → 이메일 입력 화면
+- `supabase.auth.resetPasswordForEmail()` → 재설정 이메일 발송
+- 재설정 링크 클릭 → 새 비밀번호 입력 화면
+
+**프로필 관리:**
+- 이름 수정: `profiles` 테이블 업데이트
+- 비밀번호 변경: `supabase.auth.updateUser({ password })` (이메일 사용자만)
+- OAuth 사용자: Provider 정보 표시 + 외부 Settings 링크
+
+**계정 삭제 (Cascade):**
+1. Stripe 구독 취소 (Pro인 경우)
+2. 모든 프로젝트 삭제 (→ 스캔 히스토리, MonitoringLog, RuntimeEvent cascade)
+3. GitHub OAuth token 삭제
+4. `profiles` 행 삭제
+5. Supabase Auth에서 유저 삭제
+
+**UI 연결:**
+- Login/Signup 페이지 폼 → 실제 Supabase Auth 호출로 교체
+- Profile Settings → 실제 profiles 테이블 조회/수정
+- Change Password → 실제 비밀번호 변경 API
+- Delete Account → cascade 삭제 실행
+
+**파일:**
+```
+src/
+├── lib/
+│   └── supabase/
+│       ├── client.ts              # 브라우저용 Supabase 클라이언트
+│       ├── server.ts              # 서버용 Supabase 클라이언트
+│       └── middleware.ts          # Auth 미들웨어 (보호 라우트)
+├── app/
+│   ├── middleware.ts              # Next.js 미들웨어 (세션 체크)
+│   ├── auth/
+│   │   ├── callback/
+│   │   │   └── route.ts          # OAuth 콜백 처리
+│   │   ├── forgot-password/
+│   │   │   └── page.tsx          # 비밀번호 찾기 화면
+│   │   └── reset-password/
+│   │       └── page.tsx          # 비밀번호 재설정 화면
+│   └── auth/confirm/
+│       └── route.ts              # 이메일 인증 콜백
+```
+
+---
+
+### Step 2: F2 + F3 — 프로젝트 CRUD + Project Key
+
+**API 엔드포인트:**
+
+| Method | 경로 | 기능 |
+|--------|------|------|
+| `GET` | `/api/projects` | 내 프로젝트 목록 |
+| `POST` | `/api/projects` | 프로젝트 생성 (+ Key 생성) |
+| `PATCH` | `/api/projects/[id]` | 프로젝트 수정 (이름, URL) |
+| `DELETE` | `/api/projects/[id]` | 프로젝트 삭제 (cascade) |
+| `POST` | `/api/projects/[id]/regenerate-key` | Project Key 재발급 |
+
+**Project Key 생성:**
+```
+형식: gr_sk_ + 32자 랜덤 (a-z, 0-9)
+저장: hash (bcrypt) + prefix (gr_sk_a1b2, 표시용)
+발급 시 1회 전체 표시 → 이후 마스킹 (gr_sk_a1b2••••••••)
+재발급 시 기존 키 즉시 무효화
+```
+
+**Free 플랜 제한:**
+- 프로젝트 생성 시 현재 개수 확인
+- Free: 최대 3개 초과 시 → "Upgrade to Pro for unlimited projects" 안내
+- Pro: 무제한
+
+**UI 연결:**
+- Project Switcher → `GET /api/projects` 실제 조회
+- New Project Dialog → `POST /api/projects` 실제 생성
+- Project Settings → `PATCH /api/projects/[id]` 실제 수정
+- Danger Zone → `DELETE /api/projects/[id]` 실제 삭제
+- MCP Connection 카드 → 실제 project_key_prefix 표시 + Regenerate 동작
+
+**파일:**
+```
+src/app/api/
+├── projects/
+│   ├── route.ts                   # GET (목록) + POST (생성)
+│   └── [id]/
+│       ├── route.ts               # PATCH (수정) + DELETE (삭제)
+│       └── regenerate-key/
+│           └── route.ts           # POST (키 재발급)
+```
+
+---
+
+### Step 3: F2-1 — GitHub OAuth 연동 (Private Repo)
+
+**API 엔드포인트:**
+
+| Method | 경로 | 기능 |
+|--------|------|------|
+| `GET` | `/api/auth/github` | GitHub OAuth 페이지 리다이렉트 |
+| `GET` | `/api/auth/github/callback` | code → access token 교환 + DB 저장 |
+| `GET` | `/api/github/repos` | 연동 계정 repo 목록 (`?q=검색어`) |
+| `GET` | `/api/github/status` | 연동 상태 확인 |
+| `DELETE` | `/api/auth/github` | 연동 해제 |
+
+**보안 (Feature Spec 4-1절 준수):**
+- Access Token **AES-256 암호화** 후 DB 저장 (`ENCRYPTION_KEY` 환경변수)
+- **CSRF 방지**: OAuth state 파라미터 생성 + 콜백 시 검증
+- Token scope 최소화: `repo` + `read:user`만
+- GitHub에서 revoke 시 401 → 재인증 유도 UI
+
+**UI 연결:**
+- New Project Dialog의 4-state UI (not_connected → connecting → connected → manual)
+- "Connect GitHub" 버튼 → `/api/auth/github` 리다이렉트
+- 연동 후 repo 검색 드롭다운 → `/api/github/repos?q=` 호출
+
+**파일:**
+```
+src/
+├── lib/
+│   └── encryption.ts              # AES-256 encrypt/decrypt 유틸
+├── app/api/
+│   ├── auth/github/
+│   │   ├── route.ts               # GET (OAuth 리다이렉트)
+│   │   └── callback/
+│   │       └── route.ts           # GET (콜백 처리)
+│   └── github/
+│       ├── repos/
+│       │   └── route.ts           # GET (repo 목록)
+│       └── status/
+│           └── route.ts           # GET (연동 상태)
+```
+
+---
+
+### Step 4: F4/F5 — 보안 스캔 엔진 (핵심)
+
+**8개 보안 체크:**
+
+| # | check_key | 체크 내용 | 구현 방법 |
+|---|-----------|----------|----------|
+| 1 | `stripe_key_exposed` | Stripe Secret Key 하드코딩 | GitHub API로 코드 fetch → `sk_live_`, `sk_test_` regex |
+| 2 | `webhook_no_verify` | Webhook 서명 미검증 | Stripe webhook 핸들러에서 `constructEvent` 사용 여부 |
+| 3 | `password_plaintext` | 비밀번호 평문 저장 | bcrypt/argon2 import 여부 확인 |
+| 4 | `no_rate_limit` | 로그인 실패 횟수 미제한 | rate limiter 미들웨어 존재 여부 |
+| 5 | `env_not_gitignored` | .env Git 미제외 | `.gitignore`에 `.env` 포함 여부 |
+| 6 | `api_key_hardcoded` | API 키 하드코딩 | 하드코딩된 API key 패턴 검색 (높은 엔트로피 문자열) |
+| 7 | `no_https` | HTTPS 미적용 | URL에 HTTP fetch → HTTPS 리다이렉트 확인 |
+| 8 | `no_privacy_policy` | 개인정보처리방침 없음 | `/privacy` 라우트 또는 관련 파일 존재 확인 |
+
+**스캔 흐름:**
+```
+1. GitHub URL → GitHub API로 repo 파일 트리 fetch
+2. 관련 파일 내용 fetch (package.json, .gitignore, src/**/*.ts 등)
+3. 8개 체크 순차 실행
+4. 등급 계산 (아래 알고리즘)
+5. Scan + ScanItem DB 저장
+6. 결과 반환
+```
+
+**등급 계산 알고리즘:**
+```
+Critical 이슈 = status가 "fail"인 항목 중 category가 payment/secrets
+Warning 이슈 = status가 "fail"인 항목 중 나머지
+
+A = 8/8 pass (이슈 0개)
+B = 7/8 pass + Critical 0개
+C = 5~7 pass + Critical 1개 이하
+D = 3~4 pass
+F = 0~2 pass 또는 Critical 2개 이상
+```
+
+**타임아웃 처리:**
+- 스캔 전체 2분 타임아웃
+- 타임아웃 시 "스캔 시간이 초과됐어요. 다시 시도해주세요." 에러
+- 정상 소요: 30초 이내
+
+**스캔 로딩 UI:**
+- "앱을 살펴보고 있어요..." 화면
+- 8개 체크 항목이 순서대로 체크되는 애니메이션
+- 완료 시 결과 페이지로 자동 이동
+
+**스캔 소스:**
+| 소스 | 트리거 | 방식 |
+|------|--------|------|
+| `web` | 대시보드에서 직접 실행 | GitHub URL → GitHub API → 서버에서 분석 |
+| `mcp` | Claude Code에서 `scan_project` | 로컬 코드 분석 → 결과 API 전송 |
+| `auto` | Cron 자동 재스캔 (Step 8) | 마지막 스캔 대상 GitHub URL 재스캔 |
+
+**API 엔드포인트:**
+
+| Method | 경로 | 기능 |
+|--------|------|------|
+| `POST` | `/api/scans` | 스캔 실행 (project_id + target_url) |
+| `GET` | `/api/scans/[scanId]` | 스캔 결과 조회 (+ scan_items) |
+| `GET` | `/api/projects/[id]/scans` | 프로젝트별 스캔 히스토리 |
+
+**UI 연결:**
+- Empty State "No Scans" → URL 입력 + Scan 버튼 → `POST /api/scans`
+- Scan Result 페이지 → `GET /api/scans/[scanId]` 실제 데이터
+- Scans History → `GET /api/projects/[id]/scans` 실제 데이터
+- "Rescan" 버튼 → 동일 target_url로 `POST /api/scans` 재실행
+- Dashboard Recent Scans → 최근 3개 실제 조회
+- Dashboard Stats → 최신 스캔의 등급/이슈 수 표시
+
+**파일:**
+```
+src/
+├── lib/
+│   ├── scan-engine/
+│   │   ├── index.ts               # 스캔 오케스트레이터
+│   │   ├── github-fetcher.ts      # GitHub API로 코드 fetch
+│   │   ├── checks/
+│   │   │   ├── stripe-key.ts      # 체크 1: Stripe 키 노출
+│   │   │   ├── webhook-verify.ts  # 체크 2: Webhook 서명
+│   │   │   ├── password-hash.ts   # 체크 3: 비밀번호 암호화
+│   │   │   ├── rate-limit.ts      # 체크 4: Rate limit
+│   │   │   ├── env-gitignore.ts   # 체크 5: .env 제외
+│   │   │   ├── api-key.ts         # 체크 6: API 키 하드코딩
+│   │   │   ├── https.ts           # 체크 7: HTTPS
+│   │   │   └── privacy-policy.ts  # 체크 8: 개인정보처리방침
+│   │   └── grade-calculator.ts    # 등급 계산 (A~F)
+├── app/api/
+│   └── scans/
+│       ├── route.ts               # POST (스캔 실행)
+│       └── [scanId]/
+│           └── route.ts           # GET (결과 조회)
+├── components/
+│   └── scan/
+│       └── scan-loading.tsx       # NEW: 스캔 로딩 애니메이션 화면
+```
+
+---
+
+### Step 5: F7 — MCP 서버 (`guardrail-mcp` npm 패키지)
+
+**별도 npm 패키지** — Claude Code에서 `npx guardrail-mcp@latest`로 실행.
+
+**7개 Tool:**
+
+| Tool | 설명 | 입력 | 출력 |
+|------|------|------|------|
+| `authenticate` | 브라우저 OAuth 팝업 → 계정 연결 | 없음 | 인증 상태 + 유저 정보 |
+| `create_project` | 새 프로젝트 생성 | name, url (선택) | 프로젝트 정보 + project_key |
+| `scan_project` | 로컬 디렉토리 보안 스캔 | project_key (선택) | 등급 + 항목별 결과 |
+| `get_scan_result` | 마지막 스캔 결과 조회 | project_key (선택) | 최근 스캔 결과 |
+| `get_fix_guide` | 이슈 수정 가이드 | issue_id | 수정 방법 + 코드 예시 |
+| `list_projects` | 내 프로젝트 목록 | 없음 | 프로젝트 리스트 |
+| `get_monitoring_status` | 모니터링 현황 | project_key | Uptime, SSL, 최근 이벤트 |
+
+**MCP 스캔 흐름 (Web과 다른 점):**
+- Web: GitHub API로 코드 fetch → 서버 분석
+- MCP: **로컬 디렉토리 직접 분석** → 결과를 우리 API로 전송 + 저장
+
+**패키지 구조:**
+```
+packages/guardrail-mcp/
+├── package.json
+├── src/
+│   ├── index.ts                   # MCP 서버 엔트리
+│   ├── tools/
+│   │   ├── authenticate.ts
+│   │   ├── create-project.ts
+│   │   ├── scan-project.ts        # 로컬 파일 스캔 + 결과 API 전송
+│   │   ├── get-scan-result.ts
+│   │   ├── get-fix-guide.ts
+│   │   ├── list-projects.ts
+│   │   └── get-monitoring-status.ts
+│   └── lib/
+│       ├── api-client.ts          # 우리 서버 API 호출
+│       └── local-scanner.ts       # 로컬 파일 시스템 스캔 로직
+```
+
+**서버 API (MCP용):**
+
+| Method | 경로 | 기능 |
+|--------|------|------|
+| `POST` | `/api/mcp/auth` | MCP 인증 (OAuth token 교환) |
+| `POST` | `/api/mcp/scans` | MCP 스캔 결과 수신 + 저장 |
+| `GET` | `/api/mcp/projects` | 프로젝트 목록 (API key 인증) |
+
+---
+
+### Step 6: F9 — URL 기반 모니터링
+
+**Cron Job 기반 — Vercel Cron 또는 별도 스케줄러:**
+
+| 항목 | 주기 | 구현 | 결과 저장 |
+|------|------|------|----------|
+| M1: Uptime 체크 | 5분마다 | `fetch(projectUrl)` → HTTP 상태 코드 확인 | MonitoringLog (type: uptime) |
+| M2: SSL 만료 | 1일 1회 | Node.js `tls.connect()` → 인증서 만료일 파싱 | MonitoringLog (type: ssl) |
+| M3: 보안 헤더 | 1일 1회 | HTTP 응답 헤더 분석 (HSTS, CSP, X-Frame-Options 등) | MonitoringLog (type: header) |
+| M4: 자동 재스캔 | 1일 1회 | 마지막 스캔 대상 GitHub URL 재스캔 + 이전 결과 비교 | Scan (source: auto) |
+
+**API 엔드포인트 (Cron 호출용):**
+
+| Method | 경로 | 기능 |
+|--------|------|------|
+| `GET` | `/api/cron/uptime` | 모든 활성 프로젝트 Uptime 체크 |
+| `GET` | `/api/cron/ssl-check` | 모든 활성 프로젝트 SSL 체크 |
+| `GET` | `/api/cron/security-headers` | 모든 활성 프로젝트 헤더 체크 |
+| `GET` | `/api/cron/auto-rescan` | 모든 활성 프로젝트 자동 재스캔 |
+
+**Vercel Cron 설정 (`vercel.json`):**
+```json
+{
+  "crons": [
+    { "path": "/api/cron/uptime", "schedule": "*/5 * * * *" },
+    { "path": "/api/cron/ssl-check", "schedule": "0 3 * * *" },
+    { "path": "/api/cron/security-headers", "schedule": "0 4 * * *" },
+    { "path": "/api/cron/auto-rescan", "schedule": "0 5 * * *" }
+  ]
+}
+```
+
+**UI 연결:**
+- Dashboard Overview → Stats 카드 (Uptime %, SSL 만료일, Open Issues) 실제 데이터
+- Dashboard Overview → SDK 미설치 시 URL 모니터링 데이터만 표시
+
+**파일:**
+```
+src/app/api/cron/
+├── uptime/
+│   └── route.ts
+├── ssl-check/
+│   └── route.ts
+├── security-headers/
+│   └── route.ts
+└── auto-rescan/
+    └── route.ts
+```
+
+---
+
+### Step 7: F10 — SDK 런타임 모니터링 (`guardrail-sdk` npm 패키지)
+
+**별도 npm 패키지** — 사용자 앱에 설치되는 미들웨어.
+
+**설치 & 사용:**
+```typescript
+// Express
+import { guardrail } from 'guardrail-sdk'
+app.use(guardrail({ projectKey: process.env.GUARDRAIL_PROJECT_KEY }))
+
+// Next.js middleware
+export { guardrailMiddleware as middleware } from 'guardrail-sdk/next'
+```
+
+**SDK가 수집하는 이벤트:**
+
+| 이벤트 | 수집 데이터 | 용도 |
+|--------|-----------|------|
+| `auth.login_failed` | IP, timestamp, user_agent | 브루트포스 감지 |
+| `auth.login_success` | IP, geo, timestamp, user_id | 야간/이상 위치 감지 |
+| `api.request` | endpoint, method, IP, timestamp | 트래픽 급증 감지 |
+
+**SDK가 수집하지 않는 것 (프라이버시):**
+- 요청/응답 바디, 비밀번호, 쿠키/세션, 개인 식별 정보
+
+**이벤트 수집 API:**
+
+| Method | 경로 | 기능 |
+|--------|------|------|
+| `POST` | `/api/events` | SDK 이벤트 수신 (batch, project_key 인증) |
+
+**Runtime Event 액션 API:**
+
+| Method | 경로 | 기능 |
+|--------|------|------|
+| `POST` | `/api/runtime/block-ip` | IP 차단 요청 (event_id, ip_address → SDK에 차단 명령 전달) |
+| `POST` | `/api/runtime/acknowledge` | 이벤트 확인/거부 (event_id, action: "confirm" / "deny") |
+| `GET` | `/api/runtime/events` | Runtime Events 목록 조회 (project_id, 페이지네이션) |
+
+**액션 동작 방식:**
+- **Block IP** (브루트포스 모달): `block-ip` API 호출 → runtime_events 상태를 `blocked`로 업데이트 + SDK 설정에 차단 IP 추가 (다음 SDK 폴링 시 반영)
+- **Was This You? → Yes**: `acknowledge` API에 `action: "confirm"` → 이벤트 상태를 `acknowledged`로 업데이트
+- **Was This You? → No**: `acknowledge` API에 `action: "deny"` → 이벤트 상태를 `suspicious`로 업데이트 + 해당 세션 강제 종료 권고
+- **View Details** (트래픽 급증): 조회 전용. 별도 API 불필요 (기존 event 데이터 표시)
+
+> MVP에서는 SDK 폴링 기반 명령 전달. 실시간 WebSocket 연동은 Phase 3 이후 고도화.
+
+**서버 분석 로직 (이벤트 → RuntimeEvent 생성):**
+
+| 감지 유형 | 조건 | RuntimeEvent type |
+|----------|------|-------------------|
+| 브루트포스 | 같은 IP, 10분 내 `login_failed` 10회+ | `brute_force` |
+| 야간 관리자 | 새벽 1~5시 관리자 `login_success` | `admin_access` |
+| 트래픽 급증 | 평소 대비 `api.request` 500%+ | `traffic_spike` |
+| 이상 위치 | 기존에 없던 국가 IP `login_success` | `new_location` |
+
+**UI 연결:**
+- Dashboard Runtime Events → runtime_events 테이블 실제 조회
+- Runtime 모달 4종 → 실제 이벤트 데이터 표시
+- "Block IP" / "Enable Rate Limiting" 버튼 → 실제 액션 (SDK 명령 전송)
+- SDK 연결 상태 → `projects.sdk_connected` 플래그
+
+**패키지 구조:**
+```
+packages/guardrail-sdk/
+├── package.json
+├── src/
+│   ├── index.ts                   # Express 미들웨어
+│   ├── next.ts                    # Next.js 미들웨어
+│   ├── collector.ts               # 이벤트 수집 + 배치 전송
+│   └── types.ts                   # 이벤트 타입 정의
+```
+
+**서버 분석 파일:**
+```
+src/lib/
+└── event-analyzer/
+    ├── index.ts                   # 분석 오케스트레이터
+    ├── brute-force.ts             # 브루트포스 감지
+    ├── admin-access.ts            # 야간 관리자 감지
+    ├── traffic-spike.ts           # 트래픽 급증 감지
+    └── new-location.ts            # 이상 위치 감지
+```
+
+---
+
+### Step 8: Stripe 결제 연동
+
+**Stripe 설정:**
+- Stripe Dashboard에서 Product 생성: "GuardRail Pro" ($19/월)
+- 연간 플랜: $190/년 ($15.8/월, 2개월 무료)
+
+**API 엔드포인트:**
+
+| Method | 경로 | 기능 |
+|--------|------|------|
+| `POST` | `/api/stripe/checkout` | Stripe Checkout Session 생성 |
+| `POST` | `/api/stripe/portal` | Stripe Customer Portal 리다이렉트 |
+| `POST` | `/api/webhooks/stripe` | Webhook 수신 (구독 상태 동기화) |
+
+**Checkout 흐름:**
+```
+"Start Free Trial" 클릭
+  → POST /api/stripe/checkout (trial_period_days: 14)
+  → Stripe Checkout 페이지 리다이렉트
+  → 결제 완료 → Webhook 수신
+  → profiles.plan = 'pro' + stripe_customer_id 저장
+  → 프로젝트 개수 제한 해제
+```
+
+**Webhook 처리 이벤트:**
+| 이벤트 | 액션 |
+|--------|------|
+| `checkout.session.completed` | plan → pro, stripe_customer_id 저장 |
+| `customer.subscription.deleted` | plan → free |
+| `customer.subscription.updated` | 플랜 상태 동기화 |
+| `invoice.payment_failed` | 결제 실패 안내 (Phase 3에서 이메일) |
+
+**Webhook 보안:** `STRIPE_WEBHOOK_SECRET`으로 서명 검증 필수
+
+**UI 연결:**
+- Landing Pricing "Upgrade to Pro" → Stripe Checkout
+- Plan & Billing "Start Free Trial" → Stripe Checkout (14일 체험)
+- Plan & Billing "Add Payment Method" → Stripe Customer Portal
+- Sidebar Plan Card → 실제 plan 상태 표시 (Free/Pro)
+- 프로젝트 생성 시 plan별 제한 적용
+
+**파일:**
+```
+src/app/api/
+├── stripe/
+│   ├── checkout/
+│   │   └── route.ts               # POST (Checkout Session 생성)
+│   └── portal/
+│       └── route.ts               # POST (Customer Portal)
+└── webhooks/
+    └── stripe/
+        └── route.ts               # POST (Webhook 수신)
+```
+
+---
+
+### Step 9: UI → 실제 데이터 연결 (Mock 교체)
+
+Phase 1의 모든 목 데이터(`src/lib/mock-data.ts`)를 실제 API 호출로 교체:
+
+| 화면 | mock → real |
+|------|-------------|
+| Dashboard Stats | `mockStats` → 최신 스캔 등급 + MonitoringLog 조회 |
+| Runtime Events | `mockRuntimeEvents` → runtime_events 테이블 |
+| Recent Scans | `mockScanHistory` (3행) → scans 테이블 최근 3개 |
+| Scan Result | `mockScanResult` → scans + scan_items 조회 |
+| Scans History | 하드코딩 6행 → scans 테이블 전체 |
+| Project Settings | 하드코딩 → projects 테이블 조회/수정 |
+| Profile Settings | "Park" 하드코딩 → profiles 테이블 |
+| Plan & Billing | "Free" 하드코딩 → profiles.plan |
+| Project Switcher | 하드코딩 → projects 테이블 (user_id 필터) |
+| Sidebar Plan Card | "2 of 3" 하드코딩 → projects count 실제 조회 |
+| Account Menu | 하드코딩 → 세션에서 유저 정보 |
+
+**Empty State 분기 (실제 데이터 기반):**
+- No Projects → `projects` count === 0
+- No Scans → 선택된 프로젝트의 `scans` count === 0
+- No Monitoring → `monitoring_enabled` === false 또는 SDK 미연결
+
+---
+
+### Step 10: Vercel 배포
+
+| 항목 | 내용 |
+|------|------|
+| 프로젝트 연결 | GitHub repo → Vercel 프로젝트 연결 |
+| 환경변수 | Vercel Dashboard에서 모든 `.env.local` 값 설정 |
+| 도메인 | `guardrail.dev` (또는 `guardrail.io`) 커스텀 도메인 |
+| Cron Jobs | `vercel.json`에 4개 cron 설정 (Step 6) |
+| Build 설정 | Next.js 자동 감지, `npm run build` |
+| Preview | PR마다 Preview 배포 자동 생성 |
+
+**배포 전 체크리스트:**
+1. `npm run build` 로컬 성공 확인
+2. 모든 환경변수 Vercel에 설정
+3. Supabase에서 Vercel URL을 OAuth redirect URL에 추가
+4. Stripe Webhook URL을 프로덕션 URL로 업데이트
+5. GitHub OAuth App callback URL을 프로덕션 URL로 업데이트
+
+---
+
+### Step 11: 법적 문서
+
+| 페이지 | 경로 | 내용 |
+|--------|------|------|
+| 이용약관 | `/terms` | 서비스 이용 조건, 면책 사항 |
+| 개인정보처리방침 | `/privacy` | 수집 정보, 사용 목적, 보관 기간, GDPR 대응 |
+| 면책조항 | 이용약관에 포함 | 스캔 결과는 참고용, 법적 보안 감사 대체 불가 |
+
+**수집하는 정보 명시:**
+- 회원: 이메일, 이름 (선택), OAuth 프로필
+- 스캔: GitHub URL, 코드 분석 결과 (코드 자체 저장 안 함)
+- SDK: IP, user_agent, geo, 요청 메타데이터 (개인 정보 아님)
+
+**파일:**
+```
+src/app/
+├── terms/
+│   └── page.tsx                   # 이용약관
+└── privacy/
+    └── page.tsx                   # 개인정보처리방침
+```
+
+---
+
+## Phase 2 파일 구조 총정리
+
+```
+src/
+├── lib/
+│   ├── supabase/
+│   │   ├── client.ts
+│   │   ├── server.ts
+│   │   └── middleware.ts
+│   ├── encryption.ts
+│   ├── scan-engine/
+│   │   ├── index.ts
+│   │   ├── github-fetcher.ts
+│   │   ├── checks/  (8개 파일)
+│   │   └── grade-calculator.ts
+│   └── event-analyzer/
+│       ├── index.ts
+│       ├── brute-force.ts
+│       ├── admin-access.ts
+│       ├── traffic-spike.ts
+│       └── new-location.ts
+├── app/
+│   ├── middleware.ts
+│   ├── auth/
+│   │   ├── callback/route.ts
+│   │   ├── confirm/route.ts
+│   │   ├── forgot-password/page.tsx
+│   │   └── reset-password/page.tsx
+│   ├── terms/page.tsx
+│   ├── privacy/page.tsx
+│   └── api/
+│       ├── projects/
+│       │   ├── route.ts
+│       │   └── [id]/
+│       │       ├── route.ts
+│       │       ├── regenerate-key/route.ts
+│       │       └── scans/route.ts
+│       ├── scans/
+│       │   ├── route.ts
+│       │   └── [scanId]/route.ts
+│       ├── events/route.ts
+│       ├── auth/github/
+│       │   ├── route.ts
+│       │   └── callback/route.ts
+│       ├── github/
+│       │   ├── repos/route.ts
+│       │   └── status/route.ts
+│       ├── stripe/
+│       │   ├── checkout/route.ts
+│       │   └── portal/route.ts
+│       ├── webhooks/stripe/route.ts
+│       ├── mcp/
+│       │   ├── auth/route.ts
+│       │   ├── scans/route.ts
+│       │   └── projects/route.ts
+│       ├── runtime/
+│       │   ├── events/route.ts          # GET (Runtime Events 목록)
+│       │   ├── block-ip/route.ts        # POST (IP 차단)
+│       │   └── acknowledge/route.ts     # POST (이벤트 확인/거부)
+│       └── cron/
+│           ├── uptime/route.ts
+│           ├── ssl-check/route.ts
+│           ├── security-headers/route.ts
+│           └── auto-rescan/route.ts
+
+packages/  (monorepo 또는 별도 repo)
+├── guardrail-mcp/                 # MCP 서버 npm 패키지
+└── guardrail-sdk/                 # SDK npm 패키지
+```
+
+---
+
+## Phase 2 검증 방법
+
+1. 회원가입 (이메일) → 이메일 인증 → 로그인 성공
+2. Google/GitHub OAuth 로그인 성공
+3. 비밀번호 찾기 → 재설정 이메일 → 새 비밀번호 설정
+4. 프로젝트 생성 (3개) → 4번째 생성 시 Free 제한 안내
+5. GitHub 연동 → Private repo 검색/선택
+6. 스캔 실행 → 로딩 화면 → 결과 페이지 (실제 등급)
+7. 스캔 히스토리 실제 데이터 확인
+8. MCP 서버: Claude Code에서 `authenticate` → `scan_project` 성공
+9. SDK 설치 → 이벤트 수신 → Runtime Events 표시
+10. URL 모니터링: Uptime/SSL/헤더 체크 결과 Dashboard 반영
+11. Stripe "Start Free Trial" → 결제 → Pro 전환 확인
+12. 계정 삭제 → 모든 데이터 cascade 삭제 확인
+13. `npm run build` 성공
+14. Vercel 배포 → 프로덕션 전체 플로우 확인
+
+---
+
+## Phase 2 구현 현황 (2026-02-23 업데이트)
+
+- [x] **Step 0**: 인프라 세팅 (Supabase + DB 스키마 6개 테이블 + RLS 정책 + 환경변수)
+- [x] **Step 1**: Auth (이메일+비밀번호 회원가입/로그인, 이메일 인증, 비밀번호 찾기/재설정, Auth 미들웨어, 보호 라우트)
+- [x] **Step 2**: 프로젝트 CRUD + Project Key (GET/POST/PATCH/DELETE API + 키 재발급 + Free 플랜 3개 제한)
+- [x] **Step 9 (부분)**: Dashboard + 사이드바 + Settings → 실제 데이터 연결 (UserProvider, ProjectProvider, 프로필 수정, 비밀번호 변경, 계정 삭제, 프로젝트 생성/전환, 로그아웃)
+- [ ] **Step 3**: GitHub OAuth 연동 (Private Repo)
+- [ ] **Step 4**: 보안 스캔 엔진 (8개 체크 + 등급 계산 + 로딩 UI)
+- [ ] **Step 5**: MCP 서버 (`guardrail-mcp` npm 패키지)
+- [ ] **Step 6**: URL 기반 모니터링 (Cron — Uptime/SSL/헤더/재스캔)
+- [ ] **Step 7**: SDK 런타임 모니터링 (`guardrail-sdk` npm 패키지)
+- [ ] **Step 8**: Stripe 결제 연동 (Checkout/Portal/Webhook)
+- [ ] **Step 9 (나머지)**: Scan Result, Scans History, Runtime Events, Stats 카드 → 실제 데이터 (스캔 엔진 완성 후)
+- [ ] **Step 10**: Vercel 배포 (초기 배포 완료, 최종 배포 대기)
+- [ ] **Step 11**: 법적 문서 (이용약관 + 개인정보처리방침)
+
+### Phase 2 구현 상세 — 완료된 항목
+
+**Step 0 — Supabase 인프라:**
+- Supabase 프로젝트 생성 + 유료 플랜 활성화
+- `supabase/migrations/001_initial_schema.sql` — 6개 테이블 (profiles, projects, scans, scan_items, monitoring_logs, runtime_events)
+- RLS 정책 — user_id 기반 행 수준 보안
+- Auth Trigger — `auth.users` → `profiles` 자동 행 생성
+- `.env.local` — Supabase URL, Anon Key, Service Role Key 설정
+- Vercel 환경변수 동기화
+
+**Step 1 — Auth:**
+- `src/lib/supabase/client.ts` — 브라우저용 Supabase 클라이언트
+- `src/lib/supabase/server.ts` — 서버용 Supabase 클라이언트 (쿠키 기반)
+- `src/middleware.ts` — Auth 미들웨어 (세션 체크 + 보호 라우트)
+- `src/app/auth/callback/route.ts` — OAuth 콜백 처리
+- `src/app/auth/confirm/route.ts` — 이메일 인증 콜백
+- `src/app/auth/reset-callback/route.ts` — 비밀번호 재설정 콜백
+- `src/app/login/page.tsx` — 실제 Supabase Auth 로그인
+- `src/app/signup/page.tsx` — 실제 Supabase Auth 회원가입
+- `src/app/auth/forgot-password/page.tsx` — 비밀번호 재설정 이메일 발송
+- `src/app/auth/reset-password/page.tsx` — 새 비밀번호 설정
+- `src/app/auth/verify-email/page.tsx` — 이메일 인증 대기 화면
+- Supabase Dashboard에서 Site URL (`https://guardrail-seven.vercel.app`) + Redirect URLs 설정
+
+**Step 2 — Project CRUD + Key:**
+- `src/app/api/projects/route.ts` — GET (목록) + POST (생성, Free 3개 제한)
+- `src/app/api/projects/[id]/route.ts` — PATCH (수정) + DELETE (삭제, 소유권 검증)
+- `src/app/api/projects/[id]/regenerate-key/route.ts` — POST (키 재발급)
+- Project Key 형식: `gr_sk_` + 32자 랜덤, SHA-256 해시 저장, prefix 4자 표시용
+
+**Step 9 (부분) — Dashboard 실제 데이터 연결:**
+- `src/providers/user-provider.tsx` — React Context (Supabase Auth user + profiles 테이블)
+- `src/providers/project-provider.tsx` — React Context (프로젝트 목록 + 현재 선택 프로젝트)
+- `src/app/(dashboard)/layout.tsx` — UserProvider + ProjectProvider 래핑
+- `src/components/layout/sidebar-user-footer.tsx` — 실제 유저 데이터 + 로그아웃
+- `src/components/layout/sidebar-plan-card.tsx` — 실제 플랜/프로젝트 수
+- `src/components/layout/project-switcher.tsx` — 실제 프로젝트 목록 + FolderOpen 아이콘
+- `src/components/dialogs/new-project-dialog.tsx` — POST /api/projects 실제 생성
+- `src/components/settings/account-info.tsx` — profiles 테이블 조회/수정
+- `src/components/settings/change-password.tsx` — supabase.auth.updateUser()
+- `src/components/settings/delete-account.tsx` — 2단계 확인 + signOut
+- `src/app/(dashboard)/dashboard/page.tsx` — 실제 프로젝트 기반 상태 분기
+- Vercel 배포 완료 (`https://guardrail-seven.vercel.app`)
+
+### Phase 2 발견된 버그 및 수정
+
+| 버그 | 원인 | 수정 |
+|------|------|------|
+| 프로필 이름 저장 실패 ("Failed to save profile") | DB 컬럼명 `name` vs 코드에서 `full_name` 사용 | `user-provider.tsx`, `account-info.tsx`, `sidebar-user-footer.tsx`에서 `full_name` → `name`으로 수정 |
