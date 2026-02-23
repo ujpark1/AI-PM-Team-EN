@@ -144,10 +144,21 @@ The PM Director does not write or edit copy directly. Instead, request from the 
        ↓
 [UX Writer] Writes/edits copy + records changes in UX Writing updates
        ↓
-[PM Director] Updates output documents based on changes + records in Updates.md
+[PM Director] UX Writing Updates.md 변경 내역 확인
+       ↓
+[PM Director] 아래 4개 문서에서 해당 카피가 포함된 부분을 검색하여 동기화:
+  1. guardrail-feature-spec.md
+  2. guardrail-ux-spec.md
+  3. guardrail-implementation-plan.md
+  4. figma-review-28frames.md
+       ↓
+[PM Director] Updates.md에 문서 동기화 내역 기록
 ```
 
-**Reference Documents**: `roles/AI UX Writer.md`, `knowledge/UX Writing Knowledge.md`
+**필수 원칙: UX Writer 카피 변경 → 문서 동기화**
+> UX Writer가 프론트엔드 카피를 업데이트할 때마다, PM Director는 반드시 위 4개 스펙 문서를 리뷰하고 변경된 카피를 반영해야 한다. 이는 코드와 문서 간의 일관성을 유지하기 위한 필수 프로세스이다.
+
+**참조 문서**: `AI-UX-Writer/AI UX Writer.md`, `AI-UX-Writer/UX Writing Knowledge.md`, `AI-UX-Writer/UX Writing Updates.md`
 
 ### Examples of Delegatable Tasks
 - Error messages, onboarding text, CTA copy

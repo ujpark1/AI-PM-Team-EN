@@ -1,7 +1,7 @@
 # Guardrail MVP 세부 기능 정의서 & 화면 정의서
 
 **작성: Agent C (PM 디렉터) | 검수: Agent D (개발 디렉터)**
-**작성일: 2026-02-22 | 최종 수정: 2026-02-23 | v1.2**
+**작성일: 2026-02-22 | 최종 수정: 2026-02-23 | v1.4**
 
 ---
 
@@ -19,12 +19,21 @@
 | F6 | 스캔 결과 화면 | 보안 등급 A~F + 문제 카드 (쉬운 말) | 1.5h |
 | F8 | 대시보드 | 프로젝트 목록, 보안 등급, 최근 스캔 | 1.5h |
 
-**Phase 2 — 연결 & 모니터링** (Phase 1 검수 통과 후)
+**Phase 2 — 백엔드 + 실제 동작 + 연결 & 모니터링** (Phase 1 검수 통과 후)
 | # | 기능 | 설명 | 예상 공수 |
 |---|------|------|----------|
-| F7 | MCP 서버 | Claude Code 등에서 Project Key로 연결 → 스캔 실행 | 2h |
-| F9 | 실시간 모니터링 (Lite) | URL 기반 외부 모니터링 — SDK 불필요 | 2h |
+| - | 인프라 세팅 | Supabase (DB + Auth + RLS) + 환경변수 + Rate Limit | 1h |
+| F1~F6,F8 | 백엔드 실제 동작 | Auth/CRUD/Key/스캔엔진 → Mock 데이터 전면 교체 | 8h |
+| F7 | MCP 서버 | Claude Code 등에서 연결 → 스캔 실행 (7 Tools, npm 패키지) | 2h |
+| F9 | 실시간 모니터링 (Lite) | URL 기반 외부 모니터링 — SDK 불필요 (Vercel Cron) | 2h |
 | F10 | SDK 런타임 모니터링 | 앱 내부 이벤트 감지 — 바이브코더는 "설치해줘" 한마디로 해결 | 3h |
+| - | Stripe 결제 | Checkout/Portal/Webhook + 14일 무료 체험 | 1.5h |
+| - | 배포 + 법적 | Vercel 배포 + 이용약관 + 개인정보처리방침 | 1.5h |
+
+**Phase 3 — 알림 & 고도화** (Phase 2 완료 후)
+| # | 기능 | 설명 | 예상 공수 |
+|---|------|------|----------|
+| F11 | 알림 시스템 | 이메일 알림 (SendGrid/Resend) — 즉시 알림 + 일간 리포트 | 1h |
 
 ### F9 실시간 모니터링 상세 (URL 기반 — SDK 불필요)
 | # | 항목 | 방법 | 사용자에게 보이는 말 |
@@ -61,7 +70,7 @@ app.use(guardrail({ projectKey: 'gr_sk_xxxx' }))
 | S1 | 스캔 히스토리 비교 (이전 vs 현재) |
 | S2 | MCP 자동 수정 가이드 (코드 수정 제안) |
 | S3 | GitHub 커밋 실시간 유출 감지 |
-| S4 | 알림 시스템 (이메일 알림) |
+| S4 | 알림 고도화 (Slack 연동, 알림 커스터마이징) |
 | S5 | Slack 알림 연동 |
 | S6 | 카드 테스트 감지 / 데이터 대량 수집 감지 |
 
@@ -77,39 +86,62 @@ app.use(guardrail({ projectKey: 'gr_sk_xxxx' }))
 
 ### Screen 1: Landing Page (`/`)
 
-**목적**: 제품 소개 + 회원가입 유도. 스캔은 로그인 후에만 가능.
+**목적**: 제품 소개 + 데모 스캔으로 가치 입증 + 회원가입 유도 (PLG 전환 퍼널).
 
 ```
-┌─────────────────────────────────────────────┐
-│  🛡 Guardrail    Features  Pricing  Sign In │
-├─────────────────────────────────────────────┤
-│                                             │
-│         Ship your app                       │
-│         without security fear.              │
-│                                             │
-│      ┌────────────────────────┐             │
-│      │   Get Started Free →   │             │
-│      └────────────────────────┘             │
-│     Free for up to 3 projects               │
-│                                             │
-│  ┌──────────┐ ┌──────────┐ ┌──────────┐    │
-│  │ Pre-     │ │ Real-    │ │ MCP      │    │
-│  │ launch   │ │ time     │ │ Integra- │    │
-│  │ Scan     │ │ Guard    │ │ tion     │    │
-│  └──────────┘ └──────────┘ └──────────┘    │
-└─────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────┐
+│  🛡 Guardrail  Features Pricing  Sign In  [Sign Up Free] │
+├──────────────────────────────────────────────────┤
+│                                                  │
+│         Ship your app                            │
+│         without security fear.                   │
+│                                                  │
+│   ┌──────────────────────────┐ ┌──────────┐      │
+│   │ https://github.com/repo  │ │ Scan Now │      │
+│   └──────────────────────────┘ └──────────┘      │
+│     Free for up to 3 projects                    │
+│                                                  │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐         │
+│  │ Pre-     │ │ Real-    │ │ MCP      │         │
+│  │ launch   │ │ time     │ │ Integra- │         │
+│  │ Scan     │ │ Guard    │ │ tion     │         │
+│  └──────────┘ └──────────┘ └──────────┘         │
+└──────────────────────────────────────────────────┘
 ```
 
 | 요소 | 동작 |
 |------|------|
-| Get Started Free | → Login 화면 → 가입/로그인 → Dashboard |
-| Sign In | → Login 화면 |
+| Scan Now (Hero) | URL 입력 → 데모 스캔 로딩 → 잠금된 결과 모달 → Sign Up CTA |
+| Sign In (텍스트) | → Login 화면 |
+| Sign Up Free (primary 버튼) | → Sign Up 화면 |
 | Features | 같은 페이지 내 Features 섹션으로 스크롤 |
 | Pricing | 같은 페이지 내 Pricing 섹션으로 스크롤 |
 
+**Navbar CTA 구조**:
+- Sign In: 텍스트 링크 (보조 액션 — 기존 유저용)
+- Sign Up Free: Primary 버튼 (`bg-gr-btn`) — 신규 전환 목적
+- 모바일: 햄버거 메뉴에 Sign In 링크 + 상단 Sign Up Free 버튼 유지
+
+**PLG 데모 스캔 플로우** (로그인 불필요):
+
+```
+URL 입력 → "Scan Now" 클릭
+  → ScanLoadingState (8개 체크 항목 순차 애니메이션, ~3.4초)
+  → DemoResultModal (잠금된 결과 + Signup CTA)
+  → localStorage에 URL 저장
+  → "Sign Up — It's Free →" 클릭 → /signup
+```
+
+| 단계 | 컴포넌트 | 동작 |
+|------|---------|------|
+| 1. 로딩 | `ScanLoadingState` | 8개 항목 380ms 간격 순차 체크 (Looking for exposed API keys, Checking payment security 등) |
+| 2. 결과 | `DemoResultModal` | Preview 배너 + 등급 C + Issues 잠금 (lock 아이콘) + Passed 2개만 표시 + CTA |
+| 3. 저장 | localStorage | `gr_scanned_url` 키로 URL 저장 → Dashboard Welcome 모달에서 pre-fill |
+
 **스캔 접근 규칙**:
-- 모든 스캔/결과/대시보드는 로그인 필수
-- Landing Page에서는 제품 소개만, CTA로 가입 유도
+- 랜딩 데모 스캔: 로그인 불필요. 프론트엔드 목 데이터 기반 잠금된 미리보기 제공
+- 전체 스캔/결과/대시보드: 로그인 필수
+- 데모 결과에서는 이슈 제목+심각도만 표시, "How to fix?" 잠금 처리
 
 #### Landing Page — Features 섹션 (`/#features`)
 
@@ -399,6 +431,52 @@ app.use(guardrail({ projectKey: 'gr_sk_xxxx' }))
 
 ---
 
+### Screen 3-1: Scan History (`/project/[id]/scans`)
+
+**목적**: 선택된 프로젝트의 전체 스캔 히스토리. Dashboard Overview의 "View all →" 링크에서 진입.
+
+```
+┌────────┬────────────────────────────────────┐
+│ 🛡     │  Scan History                      │
+│        │  My SaaS App                       │
+│ [A ▾]  ├────────────────────────────────────┤
+│ My SaaS│                                    │
+│        │  ┌──────────────────────────────┐  │
+│ Overvw │  │ Grade  Date         Source   │  │
+│ Scan   │  │ Checks Status              │  │
+│ ScnHis │  ├──────────────────────────────┤  │
+│   ■    │  │  A    Today 10:23    MCP    │  │
+│ Settin │  │  8/8  All checks passed     │  │
+│        │  ├──────────────────────────────┤  │
+│ ────── │  │  B    Yesterday      Web    │  │
+│Free    │  │  7/8  1 warning             │  │
+│2/3 used│  ├──────────────────────────────┤  │
+│[Upgrad]│  │  C    Feb 20         Auto   │  │
+│        │  │  5/8  3 issues              │  │
+│ P Park │  ├──────────────────────────────┤  │
+│        │  │  B    Feb 19         Web    │  │
+│        │  │  7/8  1 warning             │  │
+│        │  ├──────────────────────────────┤  │
+│        │  │  D    Feb 18         MCP    │  │
+│        │  │  4/8  4 issues              │  │
+│        │  ├──────────────────────────────┤  │
+│        │  │  F    Feb 17         Web    │  │
+│        │  │  2/8  6 issues              │  │
+│        │  └──────────────────────────────┘  │
+└────────┴────────────────────────────────────┘
+```
+
+| 요소 | 동작 |
+|------|------|
+| 스캔 행 클릭 | → Scan Result (`/project/[id]/scan/[scanId]`) 화면으로 이동 |
+| Grade 배지 | A~F 등급 + 색상 (A/B=Green, C=Amber, D=Orange, F=Red) |
+| Source 태그 | Web / MCP / Auto — 스캔 출처 구분 |
+| Checks 요약 | 통과/전체 + 상태 메시지 |
+| 정렬 | 최신순 (created_at DESC) |
+| 페이지네이션 | 무한 스크롤 또는 "Load more" 버튼 (스캔 20개 이상 시) |
+
+---
+
 ### Screen 4: Project Settings (`/project/[id]/settings`)
 
 **목적**: 프로젝트 설정 + MCP 연결 + 모니터링 설정.
@@ -467,9 +545,11 @@ app.use(guardrail({ projectKey: 'gr_sk_xxxx' }))
 
 ---
 
-### Screen 5: Monitoring Dashboard (`/project/[id]/monitoring`)
+### Screen 5: Monitoring Dashboard — Overview에 통합 (별도 라우트 없음)
 
-**목적**: 프로젝트별 모니터링 현황. (Phase 2에서 추가)
+**목적**: 프로젝트별 모니터링 현황. ~~별도 `/project/[id]/monitoring` 라우트 없음~~ → **Overview (`/dashboard`)에 통합.**
+
+> **PM Director 결정 (2026-02-23)**: Monitoring 데이터(Uptime, SSL, Headers, Runtime Events)는 Overview의 Stats 카드 4개 + Runtime Events 섹션에 통합. 별도 페이지는 정보 분산을 야기하고, 사용자가 Overview 한 화면에서 전체 현황을 파악하는 것이 UX적으로 우월. 사이드바 네비에 Monitoring 탭 추가 불필요. 아래 와이어프레임은 Overview 내 모니터링 영역의 레퍼런스로 보존.
 
 ```
 ┌────────┬────────────────────────────────────┐
@@ -602,6 +682,132 @@ app.use(guardrail({ projectKey: 'gr_sk_xxxx' }))
 
 ---
 
+### Screen L3: Email Verification Pending (`/auth/verify-email`)
+
+**목적**: 이메일+비밀번호 가입 후 인증 대기 화면. OAuth 가입은 이 화면을 거치지 않음. (Phase 2 — 백엔드 연동 시 구현)
+
+```
+┌─────────────────────────────────────────────┐
+│                                             │
+│              🛡 Guardrail                   │
+│                                             │
+│         ┌─────────────────────┐             │
+│         │                     │             │
+│         │  📧 이메일을 확인   │             │
+│         │  해주세요           │             │
+│         │                     │             │
+│         │  park@email.com으로  │             │
+│         │  인증 메일을 보냈어  │             │
+│         │  요. 링크를 클릭하면 │             │
+│         │  바로 시작할 수 있어 │             │
+│         │  요!                │             │
+│         │                     │             │
+│         │  메일이 안 왔나요?   │             │
+│         │  [다시 보내기]       │             │
+│         │                     │             │
+│         │  다른 이메일로       │             │
+│         │  가입하기 →          │             │
+│         │                     │             │
+│         └─────────────────────┘             │
+│                                             │
+└─────────────────────────────────────────────┘
+```
+
+| 요소 | 동작 |
+|------|------|
+| 인증 대기 메시지 | 가입한 이메일 주소 표시 |
+| 다시 보내기 버튼 | 인증 메일 재발송 (`supabase.auth.resend()`) |
+| 다른 이메일로 가입하기 | → Sign Up 화면으로 이동 |
+| 인증 완료 시 | 자동으로 Dashboard로 리다이렉트 |
+
+**진입 조건**: 이메일+비밀번호 가입 직후 자동 이동. 인증 완료 전 `/dashboard` 접근 시에도 이 화면으로 리다이렉트.
+
+---
+
+### Screen L4: Forgot Password (`/auth/forgot-password`)
+
+**목적**: 비밀번호를 잊은 사용자가 재설정 이메일을 요청. (Phase 2 — 백엔드 연동 시 구현)
+
+```
+┌─────────────────────────────────────────────┐
+│                                             │
+│              🛡 Guardrail                   │
+│                                             │
+│         ┌─────────────────────┐             │
+│         │                     │             │
+│         │  비밀번호 재설정     │             │
+│         │                     │             │
+│         │  가입한 이메일을     │             │
+│         │  입력하면 재설정     │             │
+│         │  링크를 보내드려요.  │             │
+│         │                     │             │
+│         │  Email              │             │
+│         │  ┌───────────────┐  │             │
+│         │  │               │  │             │
+│         │  └───────────────┘  │             │
+│         │                     │             │
+│         │  [  Send Reset Link ]│             │
+│         │                     │             │
+│         │  ← Back to Sign In  │             │
+│         │                     │             │
+│         └─────────────────────┘             │
+│                                             │
+└─────────────────────────────────────────────┘
+```
+
+| 요소 | 동작 |
+|------|------|
+| Email 입력 | 가입된 이메일 주소 입력 |
+| Send Reset Link | `supabase.auth.resetPasswordForEmail()` → 성공 시 확인 메시지 |
+| 성공 메시지 | "재설정 링크를 보냈어요. 이메일을 확인해주세요." (같은 화면에서 표시) |
+| Back to Sign In | → Login 화면 |
+
+**보안**: 존재하지 않는 이메일도 동일한 성공 메시지 표시 (이메일 존재 여부 노출 방지).
+
+---
+
+### Screen L5: Reset Password (`/auth/reset-password`)
+
+**목적**: 재설정 링크를 통해 새 비밀번호 설정. (Phase 2 — 백엔드 연동 시 구현)
+
+```
+┌─────────────────────────────────────────────┐
+│                                             │
+│              🛡 Guardrail                   │
+│                                             │
+│         ┌─────────────────────┐             │
+│         │                     │             │
+│         │  새 비밀번호 설정    │             │
+│         │                     │             │
+│         │  New Password       │             │
+│         │  ┌───────────────┐  │             │
+│         │  │               │  │             │
+│         │  └───────────────┘  │             │
+│         │  Must be 8+ chars   │             │
+│         │                     │             │
+│         │  Confirm Password   │             │
+│         │  ┌───────────────┐  │             │
+│         │  │               │  │             │
+│         │  └───────────────┘  │             │
+│         │                     │             │
+│         │  [ Reset Password ] │             │
+│         │                     │             │
+│         └─────────────────────┘             │
+│                                             │
+└─────────────────────────────────────────────┘
+```
+
+| 요소 | 동작 |
+|------|------|
+| New Password | 8자 이상 새 비밀번호 입력 |
+| Confirm Password | 비밀번호 확인 입력 |
+| Reset Password | `supabase.auth.updateUser({ password })` → 성공 시 Login으로 이동 |
+| 성공 메시지 | "비밀번호가 변경됐어요. 로그인해주세요." → 자동으로 Login 화면 이동 |
+
+**진입 조건**: Supabase 재설정 이메일의 링크 클릭 시. 직접 URL 접근 시 토큰 검증 실패 → "링크가 만료됐어요. 다시 요청해주세요." + Forgot Password 링크.
+
+---
+
 ### Screen 6: Profile Settings (`/settings/profile`)
 
 **목적**: 사용자 프로필 관리 + 외관 설정.
@@ -640,6 +846,55 @@ app.use(guardrail({ projectKey: 'gr_sk_xxxx' }))
 | Change Password (Email) | 읽기 모드(•••• + Edit) → 편집 모드(3개 입력 + Cancel/Update Password) |
 | Change Password (OAuth) | "You signed in with [Provider]." + 외부 Settings 링크 (GitHub/Google) |
 | Delete Account | Danger Zone — 확인 후 계정 영구 삭제 |
+
+**Change Password — OAuth 사용자 UI (GitHub 예시)**:
+```
+┌─────────────────────────────────────────┐
+│  Change Password                        │
+│                                         │
+│  [GitHub 아이콘]                        │
+│  You signed in with GitHub. Passwords   │
+│  are managed by your GitHub account.    │
+│                                         │
+│  Manage in GitHub Settings →            │  ← 외부 링크
+└─────────────────────────────────────────┘
+```
+
+**Change Password — Email/Password 사용자 UI (편집 모드)**:
+```
+┌─────────────────────────────────────────┐
+│  Change Password                        │
+│                                         │
+│  Current Password                       │
+│  ┌─────────────────────────────────────┐│
+│  │ ••••••••                            ││
+│  └─────────────────────────────────────┘│
+│  New Password                           │
+│  ┌─────────────────────────────────────┐│
+│  │ ••••••••                            ││
+│  └─────────────────────────────────────┘│
+│  Confirm Password                       │
+│  ┌─────────────────────────────────────┐│
+│  │ ••••••••                            ││
+│  └─────────────────────────────────────┘│
+│                                         │
+│  [Cancel]  [Update Password]            │
+└─────────────────────────────────────────┘
+```
+
+**외부 링크 매핑**:
+| Provider | Settings URL |
+|---|---|
+| GitHub | `https://github.com/settings/security` |
+| Google | `https://myaccount.google.com/security` |
+
+**Component Props**:
+```tsx
+interface ChangePasswordProps {
+  authProvider?: "email" | "github" | "google";  // default: "email"
+}
+```
+`authProvider` 값은 사용자 세션/프로필에서 가져온다. 현재 프론트엔드에서는 prop으로 전달받아 mock 가능.
 
 ---
 
@@ -706,6 +961,178 @@ app.use(guardrail({ projectKey: 'gr_sk_xxxx' }))
 | 무료 한도 | 최대 3개 |
 | 한도 초과 시 | "업그레이드하면 더 만들 수 있어요" 안내 |
 | 삭제 | 확인 다이얼로그 필수. 스캔 히스토리도 함께 삭제 |
+
+### F2-1: GitHub OAuth Integration 상세
+
+New Project 다이얼로그에서 GitHub OAuth를 통해 private repository를 검색/선택할 수 있는 기능의 상세 스펙.
+
+#### OAuth Configuration
+
+| Scope | Purpose |
+|-------|---------|
+| `repo` | Private repository 접근 (코드 읽기, 스캔) |
+| `read:user` | 사용자 프로필 정보 (username, avatar) |
+
+```
+Application name:  GuardRail
+Homepage URL:      https://guardrail.dev
+Callback URL:      https://guardrail.dev/api/auth/github/callback
+                   (dev: http://localhost:3000/api/auth/github/callback)
+```
+
+#### GitHub 연동 User Flow
+
+**Flow A: 계정 미연동 (최초)**
+```
+1. New Project 다이얼로그 → "Connect GitHub" 버튼 표시
+2. 버튼 클릭 → GitHub OAuth 동의 화면 리다이렉트
+3. 권한 승인 → 콜백 → "Connected as @username" 표시
+4. Repository 검색 드롭다운 활성화 → repo 검색/선택 (private 포함)
+```
+
+**Flow B: 계정 이미 연동**
+```
+1. New Project 다이얼로그 → "Connected as @username" 바로 표시
+2. Repository 검색 드롭다운에서 바로 repo 선택
+```
+
+**Flow C: 수동 URL 입력 (폴백)**
+```
+1. "Or enter URL manually" 클릭 → URL 입력 필드 표시
+2. Public repo만 이 방식으로 연결 가능
+```
+
+#### New Project — GitHub 연동 UI States
+
+**State 1: Not Connected (기본)**
+```
+┌─────────────────────────────────────────┐
+│  GitHub Repository                      │
+│                                         │
+│  ┌─────────────────────────────────────┐│
+│  │  [GitHub 아이콘]  Connect GitHub    ││  ← 버튼
+│  └─────────────────────────────────────┘│
+│                                         │
+│  Or enter URL manually                  │  ← 텍스트 링크
+│                                         │
+│  We'll scan your code for security      │
+│  issues                                 │
+└─────────────────────────────────────────┘
+```
+
+**State 2: Connecting (로딩)**
+```
+┌─────────────────────────────────────────┐
+│  GitHub Repository                      │
+│                                         │
+│  ┌─────────────────────────────────────┐│
+│  │  [스피너]  Connecting to GitHub...  ││
+│  └─────────────────────────────────────┘│
+└─────────────────────────────────────────┘
+```
+
+**State 3: Connected — Repo 미선택**
+```
+┌─────────────────────────────────────────┐
+│  GitHub Repository                      │
+│                                         │
+│  ✓ Connected as @parkdev        [변경]  │
+│                                         │
+│  ┌─────────────────────────────────────┐│
+│  │  🔍  Search repositories...        ││  ← 검색 드롭다운
+│  └─────────────────────────────────────┘│
+│                                         │
+│  We'll scan your code for security      │
+│  issues                                 │
+└─────────────────────────────────────────┘
+```
+
+**State 4: Connected — Repo 선택 완료**
+```
+┌─────────────────────────────────────────┐
+│  GitHub Repository                      │
+│                                         │
+│  ✓ Connected as @parkdev        [변경]  │
+│                                         │
+│  ┌─────────────────────────────────────┐│
+│  │  🔒 my-org/private-app        [✕]  ││  ← 선택된 repo
+│  └─────────────────────────────────────┘│
+│                                         │
+│  We'll scan your code for security      │
+│  issues                                 │
+└─────────────────────────────────────────┘
+```
+
+**State 5: Manual URL Input (폴백)**
+```
+┌─────────────────────────────────────────┐
+│  GitHub Repository                      │
+│                                         │
+│  ┌─────────────────────────────────────┐│
+│  │  https://github.com/user/repo      ││  ← URL 입력 필드
+│  └─────────────────────────────────────┘│
+│                                         │
+│  Connect GitHub for private repos →     │  ← 텍스트 링크
+│                                         │
+│  We'll scan your code for security      │
+│  issues                                 │
+└─────────────────────────────────────────┘
+```
+
+#### GitHub OAuth API Endpoints
+
+**`GET /api/auth/github`** — GitHub OAuth 인증 페이지 리다이렉트
+- 응답: 302 redirect to `https://github.com/login/oauth/authorize?client_id=...&scope=repo,read:user`
+
+**`GET /api/auth/github/callback`** — OAuth 콜백 처리 (code → access token 교환)
+- 요청: `?code=xxx&state=xxx`
+- 응답: 302 redirect to `/dashboard` (+ cookie/session 설정)
+
+**`GET /api/github/repos`** — 연동된 계정의 repository 목록
+- 요청: `?q=search_term` (선택)
+- 응답:
+```json
+{
+  "repos": [
+    {
+      "id": 123,
+      "full_name": "my-org/private-app",
+      "private": true,
+      "default_branch": "main",
+      "language": "TypeScript",
+      "updated_at": "2026-02-20T10:00:00Z"
+    }
+  ]
+}
+```
+
+**`GET /api/github/status`** — GitHub 연동 상태 확인
+- 응답:
+```json
+{
+  "connected": true,
+  "username": "parkdev",
+  "avatar_url": "https://avatars.githubusercontent.com/u/123"
+}
+```
+
+**`DELETE /api/auth/github`** — GitHub 연동 해제
+- 응답: `{ "success": true }`
+
+#### GitHub 연동 Frontend 컴포넌트
+
+```
+new-project-dialog.tsx
+├── GitHubConnectSection
+│   ├── State: not_connected → "Connect GitHub" 버튼
+│   ├── State: connecting → 로딩 스피너
+│   ├── State: connected → username 표시 + repo 검색
+│   └── State: manual → URL 입력 필드
+└── RepoSearchDropdown
+    ├── 검색 입력
+    ├── Repo 목록 (🔒 private / 🌐 public 아이콘 구분)
+    └── 선택된 repo 표시
+```
 
 ### F3: Project Key
 
@@ -846,6 +1273,10 @@ User
 ├── name
 ├── avatar_url
 ├── provider (email / google / github)
+├── github_access_token (encrypted, nullable — GitHub OAuth access token)
+├── github_username (nullable — GitHub username)
+├── github_avatar_url (nullable — GitHub profile avatar URL)
+├── github_connected_at (datetime, nullable — GitHub 연동 시각)
 ├── created_at
 
 Project
@@ -854,6 +1285,8 @@ Project
 ├── name
 ├── url (nullable)
 ├── github_repo (nullable — OAuth 연동 시 "owner/repo" 형식, 수동 입력 시 full URL)
+├── github_repo_id (number, nullable — GitHub repository ID)
+├── github_repo_private (boolean — Private repo 여부)
 ├── project_key_hash (hashed)
 ├── project_key_prefix (gr_sk_a1b2, 표시용)
 ├── monitoring_enabled (boolean, default true)
@@ -903,6 +1336,16 @@ RuntimeEvent (SDK에서 수신)
 
 ---
 
+## 4-1. Security Considerations (OAuth)
+
+1. **Access Token 암호화**: GitHub access token은 DB에 AES-256으로 암호화하여 저장
+2. **Token Scope 최소화**: 필요한 최소 scope만 요청 (`repo`, `read:user`)
+3. **Token 갱신**: GitHub OAuth token은 만료되지 않지만, 사용자가 GitHub에서 revoke할 수 있으므로 401 응답 시 재인증 유도
+4. **CSRF 방지**: OAuth state 파라미터로 CSRF 공격 방지
+5. **Webhook Secret**: GitHub webhook 연동 시 secret 검증 필수
+
+---
+
 ## 5. 개발 디렉터(Agent D) 기술 검토 의견
 
 ### Phase 1 (핵심 루프) — 동의
@@ -943,6 +1386,9 @@ RuntimeEvent (SDK에서 수신)
 | 1b | └ Pricing 섹션 | `/#pricing` | No | 1 |
 | L1 | Login (이메일+비밀번호, Google/GitHub OAuth) | `/login` | No | 1 |
 | L2 | Sign Up (이름, 이메일, 비밀번호, Google/GitHub OAuth) | `/signup` | No | 1 |
+| L3 | Email Verification Pending (이메일 인증 대기) | `/auth/verify-email` | No | 2 |
+| L4 | Forgot Password (비밀번호 재설정 이메일 요청) | `/auth/forgot-password` | No | 2 |
+| L5 | Reset Password (새 비밀번호 설정) | `/auth/reset-password` | No | 2 |
 | 2 | Overview (등급 + 모니터링 + SDK이벤트 + 최근스캔 + 등급 가이드) | `/dashboard` | Yes | 1 |
 | 3 | Scan Result (스캔 상세) | `/project/[id]/scan/[scanId]` | Yes | 1 |
 | 4 | Project Settings (General, MCP, Danger Zone) | `/project/[id]/settings` | Yes | 1 |
@@ -951,6 +1397,8 @@ RuntimeEvent (SDK에서 수신)
 | 7 | Plan & Billing (현재 플랜, 업그레이드) | `/settings/billing` | Yes | 1 |
 | E1 | Empty State — No Projects (첫 로그인) | `/dashboard` | Yes | 1 |
 | E2 | Empty State — No Scans (프로젝트 생성 후) | `/dashboard` | Yes | 1 |
+| T1 | Terms of Service (이용약관) | `/terms` | No | 2 |
+| T2 | Privacy Policy (개인정보처리방침) | `/privacy` | No | 2 |
 
 **사이드바 네비게이션 (4개):**
 - 📊 Overview — 프로젝트 전체 현황판 (등급 + 모니터링 + SDK이벤트 + 최근스캔)
@@ -974,13 +1422,37 @@ Phase 1: 핵심 루프
 ├── Empty States (No Projects, No Scans)
 └── 🔍 PM 디렉터 검수 → 통과 시 Phase 2 진행
 
-Phase 2: 연결 & 모니터링
-├── F7 MCP 서버 (4+1 Tools)
-├── F9 URL 모니터링 (Uptime, SSL, Headers, 재스캔)
+Phase 2: 백엔드 + 실제 동작 + 연결 & 모니터링
+├── 인프라: Supabase (DB + Auth) + Stripe + Vercel 배포
+├── F1~F6, F8 백엔드 실제 동작 (Auth/CRUD/스캔엔진/Mock교체)
+├── F7 MCP 서버 (7 Tools, npm 패키지)
+├── F9 URL 모니터링 (Vercel Cron — Uptime/SSL/Headers/재스캔)
 ├── F10 SDK 런타임 모니터링 (npm 패키지 + 이벤트 수집)
-├── F11 알림 시스템 (이메일)
+├── 결제: Stripe 연동 (Checkout/Portal/Webhook)
+├── 법적: 이용약관 + 개인정보처리방침
 └── 🔍 PM 디렉터 최종 검수
+
+Phase 3: 알림 & 고도화 (Phase 2 완료 후)
+├── F11 알림 시스템 (이메일 — SendGrid/Resend)
+├── 즉시 알림 (앱 다운, 브루트포스, SSL 만료 7일 이내)
+├── 일간 리포트 (매일 오전 9시 요약)
+└── 🔍 PM 디렉터 검수
 ```
 
 **PM 디렉터 코멘트:**
 Phase 1이 끝나면 알려주세요. 핵심 루프(가입 → 프로젝트 생성 → 스캔 → 결과 확인)가 매끄럽게 돌아가는지 검수합니다. Phase 1이 안 되면 Phase 2는 의미 없습니다.
+
+> **v1.3 변경 (2026-02-23)**: Phase 2 착수 전 PM Director 정합성 리뷰. 주요 변경사항:
+> 1. F11 알림 시스템을 Phase 2 → Phase 3으로 이관 (Implementation Plan과 정합성 확보)
+> 2. Phase 2 범위를 "백엔드 + 실제 동작 + 연결 & 모니터링"으로 확장 (12-Step 구현 계획과 일치)
+> 3. Screen L3/L4/L5 추가 (Email Verification, Forgot Password, Reset Password 화면 정의)
+> 4. Screen 5 Monitoring Dashboard → Overview 통합 결정 확정
+> 5. Screen 3-1 Scan History 와이어프레임 추가
+> 6. 라우팅 테이블에 L3~L5, T1~T2 (법적 문서) 추가
+
+> **MCP Phase 1 당기기 권고 검토 (Agent C 결정서 참조):**
+> Agent C가 MCP를 Phase 1으로 당기는 것을 권고했으나, 아래 이유로 Phase 2 유지:
+> - Phase 1은 "프론트엔드 목 데이터 기반 UI 완성"으로 범위를 한정. MCP는 백엔드 스캔 엔진(Step 4) 완성 후에야 의미 있음.
+> - Phase 2 Step 5에서 스캔 엔진을 그대로 재활용하여 MCP를 구현하므로, 실질적으로 Phase 2 초중반에 빠르게 도달.
+> - Phase 1 UI가 완성되지 않은 상태에서 MCP를 먼저 구현하면, 스캔 결과 표시 화면 없이 MCP만 동작하는 불완전한 상태가 됨.
+> - **결론**: Phase 2 내에서 Step 5 우선순위를 높이는 것으로 타협. MCP는 스캔 엔진(Step 4) 직후 바로 구현.
