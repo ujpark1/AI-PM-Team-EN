@@ -1,183 +1,183 @@
-# Knowledge Base — Agent B (프로덕트 검증 분석가)
+# Knowledge Base — Agent B (Product Validation Analyst)
 
-## 1. 검증 프레임워크 & 방법론
+## 1. Validation Frameworks & Methodologies
 
-### Lean Startup 방법론
-- **Build → Measure → Learn 사이클**: 빠르게 만들고, 측정하고, 배우기
-- **MVP (Minimum Viable Product)**: 핵심 가설을 검증할 수 있는 최소한의 제품
-  - **Wizard of Oz MVP**: 뒷단은 수동, 앞단만 자동처럼 보이게
-  - **Concierge MVP**: 소수 고객에게 직접 서비스 제공
-  - **Landing Page MVP**: 제품 없이 랜딩 페이지로 수요 테스트
-  - **노하우**: MVP는 "최소한의 기능"이 아니라 "핵심 가설을 검증하는 최소한의 실험"
+### Lean Startup Methodology
+- **Build → Measure → Learn Cycle**: Build quickly, measure, and learn
+- **MVP (Minimum Viable Product)**: The minimum product that can validate your core hypothesis
+  - **Wizard of Oz MVP**: Backend is manual, but the frontend appears automated
+  - **Concierge MVP**: Provide the service directly to a small number of customers
+  - **Landing Page MVP**: Test demand with a landing page without an actual product
+  - **Key Insight**: An MVP is not "the minimum set of features" but rather "the minimum experiment to validate your core hypothesis"
 
 ### Hypothesis-Driven Development
-- **가설 구조**: "우리는 [타겟 고객]이 [특정 상황]에서 [우리 솔루션]을 사용하면 [기대 결과]를 얻을 것이라고 믿는다"
-- **검증 기준**: "이 가설이 맞다면 [측정 가능한 지표]가 [구체적 수치] 이상이어야 한다"
-- **Kill criteria**: 사전에 "이 수치 이하면 이 아이디어를 포기한다"는 기준 설정
+- **Hypothesis Structure**: "We believe that [target customer] will achieve [expected outcome] when they use [our solution] in [specific situation]"
+- **Validation Criteria**: "If this hypothesis is correct, [measurable metric] should be at or above [specific threshold]"
+- **Kill Criteria**: Set criteria in advance such as "if the metric falls below this threshold, we abandon this idea"
 
-### Customer Development (고객 개발)
-Steve Blank의 4단계:
-1. **Customer Discovery**: 문제가 진짜인지 확인
-2. **Customer Validation**: 솔루션에 돈을 낼 의향이 있는지 확인
-3. **Customer Creation**: 확보 채널 테스트
-4. **Company Building**: 스케일
+### Customer Development
+Steve Blank's 4 Stages:
+1. **Customer Discovery**: Verify that the problem is real
+2. **Customer Validation**: Confirm willingness to pay for the solution
+3. **Customer Creation**: Test acquisition channels
+4. **Company Building**: Scale
 
-**인터뷰 노하우 (The Mom Test)**:
-- 나쁜 질문: "이 앱 쓸 것 같아요?" (사회적 바람직성 편향)
-- 좋은 질문: "지난주에 이 문제를 어떻게 해결했나요?" (과거 행동 기반)
-- 가장 좋은 질문: "그 해결책에 얼마를 쓰고 있나요?" (지불 의향 확인)
+**Interview Best Practices (The Mom Test)**:
+- Bad question: "Would you use this app?" (social desirability bias)
+- Good question: "How did you solve this problem last week?" (based on past behavior)
+- Best question: "How much are you spending on that solution?" (confirms willingness to pay)
 
 ---
 
-## 2. 경쟁 분석 노하우
+## 2. Competitive Analysis Best Practices
 
-### 경쟁 분석 매트릭스 작성법
-| 평가 항목 | 우리 | 경쟁자 A | 경쟁자 B | 경쟁자 C |
+### How to Build a Competitive Analysis Matrix
+| Evaluation Criteria | Us | Competitor A | Competitor B | Competitor C |
 |-----------|------|----------|----------|----------|
-| 핵심 기능 1 | | | | |
-| 핵심 기능 2 | | | | |
-| 가격 | | | | |
+| Core Feature 1 | | | | |
+| Core Feature 2 | | | | |
+| Pricing | | | | |
 | UX/UI | | | | |
-| 타겟 세그먼트 | | | | |
-| 강점 | | | | |
-| 약점 | | | | |
+| Target Segment | | | | |
+| Strengths | | | | |
+| Weaknesses | | | | |
 
-### 경쟁자 유형 분류
-1. **직접 경쟁자 (Direct)**: 같은 문제를 같은 방식으로 해결
-2. **간접 경쟁자 (Indirect)**: 같은 문제를 다른 방식으로 해결
-3. **잠재 경쟁자 (Potential)**: 아직 이 시장에 없지만 진입 가능한 대기업
-4. **대체재 (Substitute)**: 고객이 현재 사용하는 불완전한 해결책 (엑셀, 수작업 등)
+### Competitor Type Classification
+1. **Direct Competitors**: Solve the same problem in the same way
+2. **Indirect Competitors**: Solve the same problem in a different way
+3. **Potential Competitors**: Large companies not yet in this market but capable of entering
+4. **Substitutes**: Imperfect solutions customers currently use (spreadsheets, manual processes, etc.)
 
-### 경쟁 우위 (Moat) 평가
-- **네트워크 효과**: 사용자가 많을수록 가치 증가 (강력)
-- **전환 비용**: 다른 제품으로 갈아타기 어려움 (중간)
-- **데이터 우위**: 사용 데이터가 쌓일수록 제품 개선 (강력)
-- **브랜드**: 카테고리 대명사 (예: "구글링") (강력하나 구축 어려움)
-- **규모의 경제**: 사용자 증가 → 단위 비용 감소 (중간)
-- **규제/라이선스**: 법적 진입 장벽 (강력하나 제한적)
-
----
-
-## 3. 재무 분석 & 유닛 이코노믹스
-
-### 핵심 재무 지표
-- **CAC (Customer Acquisition Cost)**: 고객 1명 확보 비용
-  - 산출: 마케팅/세일즈 비용 ÷ 신규 고객 수
-  - 벤치마크: B2B SaaS 평균 CAC = 월 구독료의 6-12배
-
-- **LTV (Lifetime Value)**: 고객 1명의 생애 가치
-  - 산출: ARPU × 평균 고객 수명(1/Churn Rate)
-  - **LTV/CAC 비율**: 3:1 이상이면 건강, 1:1 이면 위험
-
-- **ARPU (Average Revenue Per User)**: 사용자당 평균 매출
-- **MRR (Monthly Recurring Revenue)**: 월간 반복 매출
-- **Churn Rate**: 이탈률 (월 5% 이상이면 위험 신호)
-- **Payback Period**: CAC 회수 기간 (12개월 이내 목표)
-
-### 수익화 검증 체크리스트
-- [ ] 고객이 이 문제 해결에 현재 돈을 쓰고 있는가?
-- [ ] 우리 솔루션의 예상 가격이 고객의 지불 의향 범위 내인가?
-- [ ] 유닛 이코노믹스가 스케일 시 개선되는 구조인가?
-- [ ] CAC 회수 기간이 합리적인가? (12개월 이내)
-- [ ] LTV/CAC 비율이 3:1 이상 달성 가능한가?
+### Competitive Advantage (Moat) Assessment
+- **Network Effects**: Value increases as more users join (strong)
+- **Switching Costs**: Difficulty of switching to another product (moderate)
+- **Data Advantage**: Product improves as usage data accumulates (strong)
+- **Brand**: Becoming the category synonym (e.g., "Googling") (strong but hard to build)
+- **Economies of Scale**: More users → lower unit cost (moderate)
+- **Regulation/Licensing**: Legal barriers to entry (strong but limited)
 
 ---
 
-## 4. 데이터 추적 설계 노하우
+## 3. Financial Analysis & Unit Economics
 
-### 이벤트 트래킹 설계 원칙
+### Key Financial Metrics
+- **CAC (Customer Acquisition Cost)**: Cost to acquire one customer
+  - Calculation: Marketing/Sales costs ÷ Number of new customers
+  - Benchmark: Average B2B SaaS CAC = 6-12x monthly subscription fee
 
-**AARRR(해적 지표) 기반 이벤트 설계**:
-1. **Acquisition (획득)**: 어디서 왔는가?
+- **LTV (Lifetime Value)**: Lifetime value of one customer
+  - Calculation: ARPU × Average customer lifespan (1/Churn Rate)
+  - **LTV/CAC Ratio**: 3:1 or above is healthy, 1:1 is dangerous
+
+- **ARPU (Average Revenue Per User)**: Average revenue per user
+- **MRR (Monthly Recurring Revenue)**: Monthly recurring revenue
+- **Churn Rate**: Attrition rate (above 5% monthly is a warning sign)
+- **Payback Period**: Time to recover CAC (target within 12 months)
+
+### Monetization Validation Checklist
+- [ ] Are customers currently spending money to solve this problem?
+- [ ] Is our expected price within the customer's willingness-to-pay range?
+- [ ] Do the unit economics improve at scale?
+- [ ] Is the CAC payback period reasonable? (within 12 months)
+- [ ] Can we achieve an LTV/CAC ratio of 3:1 or above?
+
+---
+
+## 4. Data Tracking Design Best Practices
+
+### Event Tracking Design Principles
+
+**Event Design Based on AARRR (Pirate Metrics)**:
+1. **Acquisition**: Where did they come from?
    - `page_view`, `signup_started`, `signup_completed`
-   - 필수 프로퍼티: utm_source, utm_medium, utm_campaign, referrer
+   - Required properties: utm_source, utm_medium, utm_campaign, referrer
 
-2. **Activation (활성화)**: 핵심 가치를 체험했는가?
-   - `onboarding_completed`, `first_[핵심기능]_used`, `aha_moment_reached`
-   - **Aha Moment 정의가 핵심**: "어떤 행동을 한 사용자가 장기 리텐션이 높은가?"
+2. **Activation**: Did they experience the core value?
+   - `onboarding_completed`, `first_[core_feature]_used`, `aha_moment_reached`
+   - **Defining the Aha Moment is key**: "Which behaviors correlate with long-term retention?"
 
-3. **Retention (유지)**: 다시 돌아오는가?
-   - `session_started`, `[핵심기능]_used`, `day_n_return`
-   - **리텐션 커브 분석**: Day 1, Day 7, Day 30 리텐션
+3. **Retention**: Do they come back?
+   - `session_started`, `[core_feature]_used`, `day_n_return`
+   - **Retention Curve Analysis**: Day 1, Day 7, Day 30 retention
 
-4. **Revenue (수익)**: 돈을 내는가?
+4. **Revenue**: Do they pay?
    - `subscription_started`, `payment_completed`, `plan_upgraded`
-   - 필수 프로퍼티: plan_type, amount, currency
+   - Required properties: plan_type, amount, currency
 
-5. **Referral (추천)**: 다른 사람을 데려오는가?
+5. **Referral**: Do they bring others?
    - `invite_sent`, `invite_accepted`, `share_clicked`
 
-### KPI 정의 프레임워크
+### KPI Definition Framework
 
-**North Star Metric (NSM) 선정 기준**:
-- 제품의 핵심 가치를 대표하는가?
-- 측정 가능한가?
-- 팀 전체가 이해할 수 있는가?
-- 이 지표가 개선되면 비즈니스가 성장하는가?
+**North Star Metric (NSM) Selection Criteria**:
+- Does it represent the core value of the product?
+- Is it measurable?
+- Can the entire team understand it?
+- Does improving this metric lead to business growth?
 
-| 제품 유형 | North Star Metric 예시 |
+| Product Type | North Star Metric Examples |
 |-----------|----------------------|
 | SaaS B2B | Weekly Active Users (WAU), Features Used per Week |
 | Marketplace | Transactions per Month, GMV |
 | Social/Community | Daily Active Users (DAU), Content Created per Day |
 | Subscription | Monthly Retention Rate, MRR Growth |
 
-**대시보드 설계 원칙**:
-- **5초 규칙**: 대시보드를 보고 5초 안에 "상태가 좋은가 나쁜가"를 판단할 수 있어야 함
-- **계층 구조**: Executive (3-5개 핵심 지표) → Operational (10-15개) → Deep-dive (필요 시)
-- **비교 기준 포함**: 전주 대비, 전월 대비, 목표 대비
-- **알림 설정**: 이상 징후 시 자동 알림 (예: 리텐션이 갑자기 10% 이상 하락)
+**Dashboard Design Principles**:
+- **5-Second Rule**: You should be able to determine "is the status good or bad" within 5 seconds of looking at the dashboard
+- **Hierarchy**: Executive (3-5 key metrics) → Operational (10-15) → Deep-dive (as needed)
+- **Include Comparisons**: Week-over-week, month-over-month, vs. targets
+- **Alert Settings**: Automatic alerts for anomalies (e.g., retention suddenly drops more than 10%)
 
 ---
 
-## 5. 데이터 분석 노하우
+## 5. Data Analysis Best Practices
 
-### 코호트 분석 (Cohort Analysis)
-- **시간 기반 코호트**: 가입 주/월별로 그룹화 → 리텐션 추이 비교
-- **행동 기반 코호트**: 특정 행동 여부로 그룹화 (예: 온보딩 완료 vs 미완료)
-- **핵심 노하우**: 코호트 간 리텐션 차이가 줄어들고 있는가? (제품 개선 효과 확인)
+### Cohort Analysis
+- **Time-Based Cohorts**: Group by signup week/month → compare retention trends
+- **Behavior-Based Cohorts**: Group by specific behavior (e.g., onboarding completed vs. not completed)
+- **Key Insight**: Is the retention gap between cohorts narrowing? (confirms product improvement effectiveness)
 
-### 퍼널 분석 (Funnel Analysis)
-- 각 단계별 전환율 측정 → 가장 큰 이탈 지점 식별
-- **핵심 노하우**: 퍼널의 상단(인지)보다 하단(전환 직전) 개선이 ROI가 높다
+### Funnel Analysis
+- Measure conversion rate at each stage → identify the biggest drop-off point
+- **Key Insight**: Improving the bottom of the funnel (just before conversion) yields higher ROI than improving the top (awareness)
 
-### A/B 테스트 설계
-- **최소 샘플 사이즈 계산**: MDE(Minimum Detectable Effect) 기반
-- **통계적 유의성**: p-value < 0.05 (95% 신뢰구간)
-- **실행 기간**: 최소 1-2주 (주간 사이클 효과 제거)
-- **핵심 노하우**: 한 번에 하나만 테스트. 두 가지를 동시에 바꾸면 뭐가 효과인지 모른다.
+### A/B Test Design
+- **Minimum Sample Size Calculation**: Based on MDE (Minimum Detectable Effect)
+- **Statistical Significance**: p-value < 0.05 (95% confidence interval)
+- **Duration**: At least 1-2 weeks (to eliminate weekly cycle effects)
+- **Key Insight**: Test only one thing at a time. If you change two things simultaneously, you cannot determine which one caused the effect.
 
-### 세그먼트 분석
-- **파워 유저 정의**: 상위 10% 사용자의 행동 패턴 → 모든 사용자를 이쪽으로 유도
-- **이탈 예측**: 활동 감소 패턴 → 이탈 전 개입 (이메일, 알림, 인센티브)
-- **가치 기반 세그먼트**: 고가치/저가치 사용자 구분 → 리소스 집중
+### Segment Analysis
+- **Power User Definition**: Behavior patterns of the top 10% of users → guide all users toward these patterns
+- **Churn Prediction**: Declining activity patterns → intervene before churn (email, notifications, incentives)
+- **Value-Based Segments**: Distinguish high-value/low-value users → focus resources accordingly
 
-### 분석 리포트 작성 원칙
-1. **So What?**: 모든 데이터 포인트에 "그래서 뭘 해야 하는데?"를 덧붙여라
-2. **Actionable**: 액션으로 이어지지 않는 인사이트는 인사이트가 아니다
-3. **Context**: 숫자 단독이 아닌 비교(전주, 전월, 벤치마크)와 함께 제시
-4. **Honest**: 좋은 소식만이 아닌 나쁜 소식도 솔직하게
+### Analysis Report Writing Principles
+1. **So What?**: For every data point, add "so what should we do about it?"
+2. **Actionable**: An insight that does not lead to action is not an insight
+3. **Context**: Present numbers alongside comparisons (week-over-week, month-over-month, benchmarks), not in isolation
+4. **Honest**: Be candid about bad news, not just good news
 
 ---
 
-## 6. 실현 가능성 평가 노하우
+## 6. Feasibility Assessment Best Practices
 
-### 기술적 실현 가능성 체크리스트
-- [ ] 핵심 기술이 이미 존재하는가? (라이브러리, API 등)
-- [ ] 프로토타입을 2-4주 내에 만들 수 있는가?
-- [ ] 스케일링에 알려진 기술적 한계가 있는가?
-- [ ] 데이터/인프라 의존성은?
-- [ ] 규제 기술 요건(예: 보안, 개인정보보호)을 충족할 수 있는가?
+### Technical Feasibility Checklist
+- [ ] Does the core technology already exist? (libraries, APIs, etc.)
+- [ ] Can a prototype be built within 2-4 weeks?
+- [ ] Are there known technical limitations for scaling?
+- [ ] What are the data/infrastructure dependencies?
+- [ ] Can regulatory technical requirements (e.g., security, privacy) be met?
 
-### 시장 진입 실현 가능성 체크리스트
-- [ ] 첫 10명의 사용자를 어떻게 모을 것인가? (구체적 계획)
-- [ ] 초기 마케팅 예산 없이도 고객 확보가 가능한가?
-- [ ] 세일즈 사이클이 얼마나 긴가?
-- [ ] 레퍼런스 고객 확보 전략이 있는가?
+### Market Entry Feasibility Checklist
+- [ ] How will you acquire the first 10 users? (specific plan)
+- [ ] Is customer acquisition possible without an initial marketing budget?
+- [ ] How long is the sales cycle?
+- [ ] Is there a strategy for acquiring reference customers?
 
-### 리스크 매트릭스
-| | 영향 低 | 영향 中 | 영향 高 |
+### Risk Matrix
+| | Low Impact | Medium Impact | High Impact |
 |--|---------|---------|---------|
-| **발생 확률 高** | 모니터링 | 완화 계획 수립 | 즉시 대응 필요 |
-| **발생 확률 中** | 수용 가능 | 모니터링 | 완화 계획 수립 |
-| **발생 확률 低** | 수용 | 수용 가능 | 모니터링 |
+| **High Probability** | Monitor | Develop mitigation plan | Immediate response required |
+| **Medium Probability** | Acceptable | Monitor | Develop mitigation plan |
+| **Low Probability** | Accept | Acceptable | Monitor |

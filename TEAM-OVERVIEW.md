@@ -1,47 +1,57 @@
-# AI PM Team 구조
+# AI PM Team Structure
 
-## 팀 구성
+## Team Composition
 
-| 역할 | 코드명 | 포지션 | 핵심 역량 |
-|------|--------|--------|-----------|
-| **A** | Strategist | 시니어 프로덕트 전략가 | 시장 분석, 아이디어 발굴, 기회 포착 |
-| **B** | Analyst | 프로덕트 검증 분석가 | 비판적 검증, 경쟁 분석, 실현 가능성 평가, **데이터 추적 설계 & 분석** |
-| **C** | Director | 프로덕트 디렉터 | 의사결정, 우선순위 조율, 출시 총괄 |
+| Role | Code Name | Position | Core Competencies |
+|------|-----------|----------|-------------------|
+| **A** | Strategist | Senior Product Strategist | Market analysis, idea discovery, opportunity identification |
+| **B** | Analyst | Product Validation Analyst | Critical validation, competitive analysis, feasibility assessment, **data tracking design & analysis** |
+| **C** | Director | Product Director | Decision-making, priority alignment, launch oversight |
+| **UX Writer** | UX Writer | AI UX Writer | UX copy, voice design, content strategy, interface language engineering |
 
-## 역할 요약
+## Role Summary
 
-### Agent A — 시니어 프로덕트 전략가
-- 테크 업계 2회 엑싯 경험을 가진 시니어 전략가
-- 시장 트렌드 분석, 블루오션 기회 발굴, 제품 아이디어 브레인스토밍 주도
-- 직감과 경험에 기반한 대담한 아이디어 제안
+### Agent A — Senior Product Strategist
+- Senior strategist with two successful tech industry exits
+- Leads market trend analysis, blue ocean opportunity discovery, and product idea brainstorming
+- Proposes bold ideas based on intuition and experience
 
-### Agent B — 프로덕트 검증 분석가
-- A의 아이디어를 데이터와 논리로 검증하는 분석 전문가
-- 시장 경쟁력 평가, 리스크 분석, 사용자 니즈 검증
-- A와 토론하며 아이디어를 정제하고 강화
-- **출시 전**: KPI 정의, 이벤트 트래킹 설계, 대시보드 구축
-- **출시 후**: 데이터 분석, 인사이트 도출, C에게 분석 리포트 전달
+### Agent B — Product Validation Analyst
+- Analysis expert who validates A's ideas with data and logic
+- Evaluates market competitiveness, risk analysis, and user needs validation
+- Discusses and refines ideas through debate with A
+- **Pre-Launch**: KPI definition, event tracking design, dashboard setup
+- **Post-Launch**: Data analysis, insight derivation, delivers analysis reports to C
 
-### Agent C — 프로덕트 디렉터
-- 전체 제품 방향을 결정하는 의사결정권자
-- A와 B의 토론 결과를 종합하여 최종 제안 도출
-- 출시 준비(GTM 전략)부터 출시 후 운영까지 총괄
-- **출시 후**: B의 데이터 분석 리포트를 전략적으로 해석하여 피벗/스케일/킬 결정
+### Agent C — Product Director
+- Decision-maker who determines overall product direction
+- Synthesizes A and B's discussion results into final recommendations
+- Oversees everything from launch preparation (GTM strategy) to post-launch operations
+- **Post-Launch**: Strategically interprets B's data analysis reports to make pivot/scale/kill decisions
+- **Copy Delegation**: Routes all copy and UX writing tasks to the AI UX Writer; references UX Writing Knowledge for messaging decisions
 
-## 협업 모델
+### AI UX Writer
+- Content engineer who designs interface language
+- Writes and reviews all UX text (error messages, onboarding, CTAs, notifications, etc.)
+- Designs voice charts and UX content strategies
+- References `knowledge/UX Writing Knowledge.md` for all writing tasks
+- Studies `knowledge/knowledge-shared-fundamentals.md` to align copy with business strategy
+- Receives copy-related task delegation from Agent C
+
+## Collaboration Model
 
 ```
     ┌─────────────────────────────────────┐
     │          Phase 1: Discovery          │
     │                                      │
-    │   ┌───┐    토론/반복    ┌───┐       │
+    │   ┌───┐   Discussion/   ┌───┐       │
     │   │ A │ ◄────────────► │ B │       │
-    │   └─┬─┘               └─┬─┘       │
-    │     │    아이디어 + 검증    │         │
+    │   └─┬─┘   Iteration    └─┬─┘       │
+    │     │    Ideas + Validation │         │
     │     └────────┬───────────┘         │
     │              ▼                      │
     │           ┌───┐                    │
-    │           │ C │ 방향 피드백          │
+    │           │ C │ Direction Feedback  │
     │           └───┘                    │
     └─────────────────────────────────────┘
                    │
@@ -49,51 +59,72 @@
     ┌─────────────────────────────────────┐
     │       Phase 2: Validation            │
     │                                      │
-    │   A(시장기회) + B(경쟁분석) → C(판단)  │
+    │   A(Market Opp.) + B(Comp. Analysis) │
+    │              → C(Judgment)            │
     └─────────────────────────────────────┘
                    │
                    ▼
     ┌─────────────────────────────────────┐
     │        Phase 3: Decision             │
     │                                      │
-    │   C가 종합 판단 → 최종 제안서 작성     │
+    │   C synthesizes → Final proposal     │
     └─────────────────────────────────────┘
                    │
                    ▼
     ┌─────────────────────────────────────┐
-    │    Phase 4: Pre-Launch (출시 준비)    │
+    │    Phase 4: Pre-Launch               │
     │                                      │
-    │   C(GTM 총괄) + A(포지셔닝)           │
-    │   B(데이터 추적 설계 & KPI 정의)       │
+    │   C(GTM Lead) + A(Positioning)       │
+    │   B(Data Tracking Design & KPIs)     │
+    │   UX Writer(Copy & Messaging)        │
+    │     ← Delegated by C                │
     └─────────────────────────────────────┘
                    │
                    ▼
     ┌─────────────────────────────────────┐
-    │   Phase 5: Post-Launch (출시 후)      │
+    │   Phase 5: Post-Launch               │
     │                                      │
-    │   B(데이터 분석 → 리포트)             │
+    │   B(Data Analysis → Report)          │
     │          ▼                           │
-    │   C(전략적 해석 → 피벗/스케일/킬)      │
+    │   C(Strategic Interpretation          │
+    │     → Pivot/Scale/Kill)              │
     │          ▼                           │
-    │   A(다음 기회 탐색) ← 필요 시         │
+    │   A(Next Opportunity) ← if needed    │
+    │   UX Writer(Copy Iteration)          │
+    │     ← Delegated by C                │
     └─────────────────────────────────────┘
 ```
 
-## 파일 구조
+## File Structure
 
 ```
 AI PM Team/
-├── TEAM-OVERVIEW.md                    # 이 파일 - 팀 구조 개요
-├── WORKFLOW.md                         # 협업 워크플로우 상세 가이드
+├── TEAM-OVERVIEW.md                    # This file — Team structure overview
+├── WORKFLOW.md                         # Collaboration workflow guide
 ├── roles/
-│   ├── agent-a-strategist.md           # A 역할 정의 + AI 프롬프트
-│   ├── agent-b-analyst.md              # B 역할 정의 + AI 프롬프트
-│   └── agent-c-director.md             # C 역할 정의 + AI 프롬프트
+│   ├── agent-a-strategist.md           # A role definition + AI prompt
+│   ├── agent-b-analyst.md              # B role definition + AI prompt
+│   ├── agent-c-director.md             # C role definition + AI prompt
+│   └── AI UX Writer.md                 # UX Writer role definition + AI prompt
 ├── knowledge/
-│   ├── knowledge-shared-fundamentals.md # 공통 지식 베이스 (23개 PM 핵심 개념)
-│   ├── knowledge-a-strategist.md       # A의 지식 베이스 (시장분석, 아이디어 발굴)
-│   ├── knowledge-b-analyst.md          # B의 지식 베이스 (검증, 데이터 분석)
-│   └── knowledge-c-director.md         # C의 지식 베이스 (의사결정, GTM, 성장)
-└── outputs/                            # 산출물 저장 디렉토리
+│   ├── knowledge-shared-fundamentals.md # Shared knowledge base (23 core PM concepts)
+│   ├── knowledge-a-strategist.md       # A's knowledge base (market analysis, idea discovery)
+│   ├── knowledge-b-analyst.md          # B's knowledge base (validation, data analysis)
+│   ├── knowledge-c-director.md         # C's knowledge base (decisions, GTM, growth)
+│   └── UX Writing Knowledge.md         # UX Writing principles and patterns
+└── outputs/                            # All deliverables saved here
     └── .gitkeep
 ```
+
+## Output Directory
+
+All agent deliverables must be saved to the `outputs/` directory. Use descriptive filenames that indicate the content, phase, and date. Examples:
+
+- `outputs/market-analysis-ai-saas-2026-02.md`
+- `outputs/validation-report-idea-alpha.md`
+- `outputs/decision-document-project-x.md`
+- `outputs/gtm-strategy-product-launch.md`
+- `outputs/data-tracking-design-v1.md`
+- `outputs/weekly-data-report-w1.md`
+- `outputs/ux-copy-onboarding-v1.md`
+- `outputs/voice-chart-brand-x.md`

@@ -1,254 +1,326 @@
-# AI PM Team — 협업 워크플로우 가이드
+# AI PM Team — Collaboration Workflow Guide
 
-## 워크플로우 개요
+## Workflow Overview
 
-이 팀은 **협업/반복** 모델로 운영됩니다. A와 B가 함께 토론하며 아이디어를 정제하고, C가 중간중간 방향을 잡아주며 최종 결정을 내립니다.
+This team operates on a **collaboration/iteration** model. A and B discuss and refine ideas together, C provides directional guidance and makes final decisions, and the UX Writer handles all copy-related tasks delegated by C.
+
+**All deliverables from every phase must be saved to the `outputs/` directory.**
 
 ---
 
-## Phase 1: Discovery (탐색)
+## Phase 1: Discovery
 
-### 목적
-시장 기회를 발굴하고, 유망한 제품 아이디어를 도출합니다.
+### Purpose
+Discover market opportunities and derive promising product ideas.
 
-### 진행 방식
+### Process
 ```
 ┌─── Round 1 ───────────────────────────────────┐
-│ A: 시장 분석 + 아이디어 3-5개 브레인스토밍      │
+│ A: Market analysis + brainstorm 3-5 ideas      │
 │    ↓                                           │
-│ B: 각 아이디어에 대한 초기 반응 + 질문           │
+│ B: Initial reactions + questions for each idea  │
 │    ↓                                           │
-│ A & B: 토론 — 아이디어 날카롭게 다듬기           │
+│ A & B: Discussion — sharpen and refine ideas    │
 └────────────────────────────────────────────────┘
-         ↓ C에게 중간 공유
-┌─── C: 방향 피드백 ────────────────────────────┐
-│ "이 방향은 계속 파고들 가치가 있다"              │
-│ "이쪽은 드롭하고, 저쪽을 더 깊이 보라"          │
-│ "이런 각도도 고려해 보라"                       │
-└────────────────────────────────────────────────┘
-         ↓
-┌─── Round 2 (필요 시) ─────────────────────────┐
-│ A & B: C의 피드백 반영하여 추가 탐색/토론        │
-└────────────────────────────────────────────────┘
-```
-
-### 산출물
-- A의 시장 분석 리포트
-- A의 아이디어 브리프 (3-5개)
-- A-B 토론 요약
-- C의 방향 피드백
-
-### 입력에 필요한 정보
-- 탐색할 도메인/시장 (없으면 A가 트렌드 기반으로 자유 탐색)
-- 팀의 강점/약점 (있으면 A가 적합성 판단에 활용)
-- 기존 제약 사항 (예산, 기술 스택, 타임라인 등)
-
----
-
-## Phase 2: Validation (검증)
-
-### 목적
-유망 아이디어의 시장 경쟁력과 실현 가능성을 검증합니다.
-
-### 진행 방식
-```
-┌─── 병행 작업 ──────────────────────────────────┐
-│ A: 시장 기회 심층 분석                          │
-│    - 상세 TAM/SAM/SOM 추정                     │
-│    - 포지셔닝 전략 초안                         │
-│    - 비즈니스 모델 옵션                         │
-│                                                │
-│ B: 경쟁력 & 실현 가능성 분석                    │
-│    - 경쟁 분석 매트릭스                         │
-│    - 유닛 이코노믹스 검토                       │
-│    - 리스크 평가                                │
-│    - 기술적 실현 가능성                         │
+         ↓ Share with C
+┌─── C: Direction Feedback ────────────────────┐
+│ "This direction is worth pursuing"             │
+│ "Drop this one, dig deeper into that one"      │
+│ "Consider this angle as well"                  │
 └────────────────────────────────────────────────┘
          ↓
-┌─── A & B 토론 (핵심) ─────────────────────────┐
-│ A: "이 시장은 이만큼 크고, 이런 기회가 있다"     │
-│ B: "하지만 이런 리스크가 있고, 경쟁자가 강하다"  │
-│ A: "과거 경험상 이 패턴은 성공한다, 왜냐하면..." │
-│ B: "그 경험이 지금에도 적용 가능한지 검증하면..." │
-│                                                │
-│ → 합의점과 이견점 정리                          │
-│ → C에게 전달할 추천안 도출                      │
+┌─── Round 2 (if needed) ─────────────────────┐
+│ A & B: Additional exploration/discussion      │
+│        reflecting C's feedback                 │
 └────────────────────────────────────────────────┘
 ```
 
-### 산출물
-- A의 시장 기회 심층 분석 리포트
-- B의 검증 리포트 (경쟁력 + 실현 가능성 + 리스크)
-- A-B 토론 결론 (합의/이견/추천)
+### Deliverables (→ `outputs/`)
+- A's Market Analysis Report
+- A's Idea Briefs (3-5)
+- A-B Discussion Summary
+- C's Direction Feedback
+
+### Required Inputs
+- Domain/market to explore (if none, A explores based on trends)
+- Team strengths/weaknesses (if available, A uses for fit assessment)
+- Existing constraints (budget, tech stack, timeline, etc.)
 
 ---
 
-## Phase 3: Decision (결정)
+## Phase 2: Validation
 
-### 목적
-C가 A와 B의 분석을 종합하여 최종 방향을 결정합니다.
+### Purpose
+Validate the market competitiveness and feasibility of promising ideas.
 
-### 진행 방식
+### Process
 ```
-┌─── C의 종합 판단 ──────────────────────────────┐
-│ 입력:                                          │
-│   - A의 시장 기회 분석                          │
-│   - B의 검증 리포트                             │
-│   - A-B 토론 결론                               │
-│                                                │
-│ C의 평가 기준:                                  │
-│   1. 전략적 적합성                              │
-│   2. 시장 매력도                                │
-│   3. 실행 가능성                                │
-│   4. 리스크 대비 보상                           │
-│                                                │
-│ 결정:                                          │
-│   → GO: 이 아이디어로 진행                      │
-│   → PIVOT: 방향을 수정하여 재검토               │
-│   → KILL: 이 아이디어는 폐기                    │
-│   → EXPLORE MORE: 추가 탐색 필요               │
-└────────────────────────────────────────────────┘
-```
-
-### 산출물
-- C의 의사결정 문서 (결정 + 근거 + 번복 조건)
-- 실행 방향 브리프
-
----
-
-## Phase 4: Pre-Launch (출시 준비)
-
-### 목적
-제품 출시를 위한 전략과 인프라를 준비합니다.
-
-### 진행 방식
-```
-┌─── 병행 작업 ──────────────────────────────────┐
-│ C: GTM 전략 수립                               │
-│    - 타겟 고객 + 채널 + 메시지 + 프라이싱       │
-│    - 론칭 타임라인 + 마일스톤                   │
-│    - 성공 기준 정의                             │
-│                                                │
-│ A: 포지셔닝 & 메시지 전략                       │
-│    - 제품 포지셔닝 최종안                       │
-│    - 핵심 메시지 (tagline, value prop)          │
-│    - 경쟁 대비 차별화 포인트                    │
-│                                                │
-│ B: 데이터 추적 설계                             │
-│    - KPI 정의 (North Star + 선행/후행 지표)     │
-│    - 이벤트 트래킹 스펙                         │
-│    - 대시보드 설계                              │
-│    - A/B 테스트 프레임워크                      │
+┌─── Parallel Work ──────────────────────────────┐
+│ A: Deep market opportunity analysis             │
+│    - Detailed TAM/SAM/SOM estimation            │
+│    - Positioning strategy draft                  │
+│    - Business model options                      │
+│                                                 │
+│ B: Competitiveness & feasibility analysis       │
+│    - Competitive analysis matrix                 │
+│    - Unit economics review                       │
+│    - Risk assessment                             │
+│    - Technical feasibility                       │
 └────────────────────────────────────────────────┘
          ↓
-┌─── C: 최종 리뷰 & 승인 ───────────────────────┐
-│ - GTM 전략 최종 확정                           │
-│ - B의 데이터 추적 설계 리뷰 및 승인             │
-│ - 출시 체크리스트 최종 점검                     │
-│ - GO/NO-GO 론칭 결정                           │
+┌─── A & B Discussion (Core) ─────────────────┐
+│ A: "This market is this large, with these     │
+│     opportunities"                             │
+│ B: "But there are these risks, and            │
+│     competitors are strong"                    │
+│ A: "From my experience, this pattern succeeds  │
+│     because..."                                │
+│ B: "Let's verify if that experience applies    │
+│     here..."                                   │
+│                                                │
+│ → Organize consensus and disagreements         │
+│ → Derive recommendation for C                  │
 └────────────────────────────────────────────────┘
 ```
 
-### 산출물
-- C의 GTM 전략서
-- A의 포지셔닝 & 메시지 전략
-- B의 데이터 추적 설계서 (KPI + 이벤트 스펙 + 대시보드)
-- C의 출시 체크리스트
-- C의 론칭 GO/NO-GO 결정
+### Deliverables (→ `outputs/`)
+- A's Deep Market Opportunity Analysis Report
+- B's Validation Report (competitiveness + feasibility + risk)
+- A-B Discussion Conclusion (consensus/disagreements/recommendations)
 
 ---
 
-## Phase 5: Post-Launch (출시 후)
+## Phase 3: Decision
 
-### 목적
-출시 후 데이터를 기반으로 제품의 방향을 조정합니다.
+### Purpose
+C synthesizes A and B's analysis to decide the final direction.
 
-### 진행 방식
+### Process
+```
+┌─── C's Comprehensive Judgment ───────────────┐
+│ Inputs:                                       │
+│   - A's market opportunity analysis            │
+│   - B's validation report                      │
+│   - A-B discussion conclusion                  │
+│                                                │
+│ C's Evaluation Criteria:                       │
+│   1. Strategic Fit                             │
+│   2. Market Attractiveness                     │
+│   3. Executability                              │
+│   4. Risk-Reward                               │
+│                                                │
+│ Decision:                                      │
+│   → GO: Proceed with this idea                 │
+│   → PIVOT: Revisit with modified direction     │
+│   → KILL: Discard this idea                    │
+│   → EXPLORE MORE: Additional exploration needed│
+└────────────────────────────────────────────────┘
+```
+
+### Deliverables (→ `outputs/`)
+- C's Decision Document (decision + rationale + reversal conditions)
+- Execution Direction Brief
+
+---
+
+## Phase 4: Pre-Launch
+
+### Purpose
+Prepare strategy and infrastructure for product launch.
+
+### Process
+```
+┌─── Parallel Work ──────────────────────────────┐
+│ C: GTM Strategy Development                    │
+│    - Target customer + channels + messaging     │
+│      + pricing                                  │
+│    - Launch timeline + milestones               │
+│    - Success criteria definition                │
+│                                                 │
+│ A: Positioning & Message Strategy              │
+│    - Final product positioning                  │
+│    - Core messaging (tagline, value prop)       │
+│    - Differentiation vs. competitors            │
+│                                                 │
+│ B: Data Tracking Design                        │
+│    - KPI definition (North Star + leading/      │
+│      lagging indicators)                        │
+│    - Event tracking specs                       │
+│    - Dashboard design                           │
+│    - A/B testing framework                      │
+│                                                 │
+│ UX Writer: Copy & Content (delegated by C)     │
+│    - Onboarding text                            │
+│    - UI microcopy                               │
+│    - Error messages                             │
+│    - Voice chart (if new product)               │
+└────────────────────────────────────────────────┘
+         ↓
+┌─── C: Final Review & Approval ───────────────┐
+│ - GTM strategy finalized                       │
+│ - B's data tracking design reviewed & approved │
+│ - UX Writer's copy reviewed & approved         │
+│ - Launch checklist final check                 │
+│ - GO/NO-GO launch decision                     │
+└────────────────────────────────────────────────┘
+```
+
+### Deliverables (→ `outputs/`)
+- C's GTM Strategy
+- A's Positioning & Message Strategy
+- B's Data Tracking Design Document (KPI + event specs + dashboard)
+- UX Writer's Copy Package (onboarding, UI text, error messages)
+- UX Writer's Voice Chart (if applicable)
+- C's Launch Checklist
+- C's Launch GO/NO-GO Decision
+
+---
+
+## Phase 5: Post-Launch
+
+### Purpose
+Adjust product direction based on post-launch data.
+
+### Process
 
 #### Day 1-30: Validate
 ```
-┌─── 반복 사이클 (주간) ─────────────────────────┐
-│ B: 주간 데이터 분석 리포트 작성                  │
-│    - 핵심 KPI 현황                              │
-│    - 퍼널 분석                                  │
-│    - 이상 징후 및 초기 인사이트                  │
+┌─── Weekly Cycle ─────────────────────────────┐
+│ B: Write weekly data analysis report           │
+│    - Core KPI status                           │
+│    - Funnel analysis                           │
+│    - Anomalies and initial insights            │
 │         ↓                                      │
-│ C: 리포트 리뷰 + 전략적 해석                    │
-│    - "이 데이터가 의미하는 것은..."              │
-│    - 즉시 조정할 사항 결정                      │
-│    - B에게 추가 분석 요청 (필요 시)              │
+│ C: Report review + strategic interpretation    │
+│    - "What this data means is..."              │
+│    - Decide immediate adjustments              │
+│    - Request additional analysis from B        │
+│      (if needed)                               │
 │         ↓                                      │
-│ A: 사용자 피드백 기반 기회 탐색 (필요 시)        │
-│    - 예상치 못한 사용 패턴에서 기회 발견         │
+│ A: Explore opportunities from user feedback    │
+│    (if needed)                                 │
+│    - Discover opportunities in unexpected      │
+│      usage patterns                            │
+│         ↓                                      │
+│ UX Writer: Iterate copy based on data          │
+│    (delegated by C)                            │
+│    - Improve underperforming UX text           │
+│    - Optimize error messages, CTAs             │
 └────────────────────────────────────────────────┘
 ```
 
 #### Day 31-60: Optimize
 ```
-┌─── 심층 분석 사이클 ───────────────────────────┐
-│ B: 코호트 분석 + 세그먼트 분석                   │
-│    - 어떤 사용자 그룹이 가장 잘 유지되는가?      │
-│    - 이탈의 주요 원인은 무엇인가?                │
-│    - A/B 테스트 결과 분석                       │
+┌─── Deep Analysis Cycle ──────────────────────┐
+│ B: Cohort analysis + segment analysis          │
+│    - Which user groups retain best?            │
+│    - What are the main causes of churn?        │
+│    - A/B test results analysis                 │
 │         ↓                                      │
-│ C: 최적화 우선순위 결정                         │
-│    - 어디에 리소스를 집중할 것인가?              │
-│    - 어떤 실험을 다음에 진행할 것인가?           │
+│ C: Determine optimization priorities           │
+│    - Where to focus resources?                 │
+│    - What experiments to run next?             │
+│         ↓                                      │
+│ UX Writer: Optimize copy based on insights     │
+│    (delegated by C)                            │
 └────────────────────────────────────────────────┘
 ```
 
 #### Day 61-90: Scale or Pivot
 ```
-┌─── 전략적 판단 ────────────────────────────────┐
-│ B: 종합 성과 분석 리포트                        │
-│    - 유닛 이코노믹스 현실 vs 계획               │
-│    - 성장 모델링                                │
-│    - 시나리오 분석                              │
+┌─── Strategic Judgment ───────────────────────┐
+│ B: Comprehensive performance analysis report   │
+│    - Unit economics: actual vs. plan           │
+│    - Growth modeling                           │
+│    - Scenario analysis                         │
 │         ↓                                      │
-│ C: 최종 방향 결정                               │
-│    - SCALE: 성장 가속 투자                      │
-│    - PIVOT: 방향 수정 (→ Phase 1로 돌아감)      │
-│    - KILL: 프로젝트 중단                        │
+│ C: Final direction decision                    │
+│    - SCALE: Invest in growth acceleration      │
+│    - PIVOT: Change direction (→ back to        │
+│      Phase 1)                                  │
+│    - KILL: Terminate the project               │
 │         ↓                                      │
-│ A: (PIVOT 시) 새로운 기회 방향 탐색             │
+│ A: (On PIVOT) Explore new opportunity          │
+│    directions                                  │
 └────────────────────────────────────────────────┘
 ```
 
-### 산출물
-- B의 주간 데이터 분석 리포트
-- B의 코호트/세그먼트 심층 분석
-- C의 최적화 우선순위 문서
-- C의 스케일/피벗/킬 의사결정 문서
+### Deliverables (→ `outputs/`)
+- B's Weekly Data Analysis Reports
+- B's Cohort/Segment Deep Analysis
+- C's Optimization Priority Document
+- C's Scale/Pivot/Kill Decision Document
+- UX Writer's Copy Iteration Reports (if applicable)
 
 ---
 
-## 역할별 참조 파일
+## Copy & UX Writing Workflow
 
-| 역할 | 역할 정의 | 지식 베이스 |
-|------|-----------|-------------|
+### Delegation Flow
+When any phase requires copy, UX writing, or content work:
+
+```
+┌─── Copy Task Identified ─────────────────────┐
+│ C identifies a copy-related need               │
+│    ↓                                           │
+│ C delegates to UX Writer with context:         │
+│    - Component/screen type                     │
+│    - User journey stage                        │
+│    - Brand voice requirements                  │
+│    - Business objectives                       │
+│         ↓                                      │
+│ UX Writer executes:                            │
+│    - References UX Writing Knowledge.md        │
+│    - References knowledge-shared-fundamentals  │
+│    - Applies 4-step editing filter             │
+│    - Delivers output                           │
+│         ↓                                      │
+│ C reviews output:                              │
+│    - Strategic alignment check                 │
+│    - GTM messaging consistency check           │
+│    - Discusses with UX Writer if needed         │
+│         ↓                                      │
+│ C approves or requests revision                │
+└────────────────────────────────────────────────┘
+```
+
+---
+
+## Role Reference Files
+
+| Role | Role Definition | Knowledge Base |
+|------|----------------|----------------|
 | A (Strategist) | `roles/agent-a-strategist.md` | `knowledge/knowledge-a-strategist.md` |
 | B (Analyst) | `roles/agent-b-analyst.md` | `knowledge/knowledge-b-analyst.md` |
-| C (Director) | `roles/agent-c-director.md` | `knowledge/knowledge-c-director.md` |
+| C (Director) | `roles/agent-c-director.md` | `knowledge/knowledge-c-director.md` + `knowledge/UX Writing Knowledge.md` |
+| UX Writer | `roles/AI UX Writer.md` | `knowledge/UX Writing Knowledge.md` + `knowledge/knowledge-shared-fundamentals.md` |
+
+All roles share: `knowledge/knowledge-shared-fundamentals.md`
 
 ---
 
-## 사용 방법
+## Usage Guide
 
-### AI 에이전트로 사용할 때
-1. 각 역할의 `roles/agent-*.md` 파일에서 프롬프트 섹션을 복사
-2. 해당 역할의 `knowledge/knowledge-*.md` 내용을 참조 자료로 함께 제공
-3. 위 워크플로우 순서에 따라 각 에이전트와 대화
+### When Using as AI Agents
+1. Copy the prompt section from each role's `roles/*.md` file
+2. Provide the corresponding `knowledge/*.md` content as reference material
+3. Interact with each agent following the workflow phases above
+4. **All outputs must be saved to the `outputs/` directory**
 
-### 예시: Discovery 단계 시작
+### Example: Starting the Discovery Phase
 ```
-[Agent A에게]
-"현재 AI 기반 B2B SaaS 시장을 분석하고, 유망한 제품 아이디어를 3-5개 브레인스토밍해줘."
+[To Agent A]
+"Analyze the current AI-based B2B SaaS market and brainstorm 3-5 promising product ideas."
 
-[Agent A의 결과를 Agent B에게]
-"Agent A가 다음 아이디어들을 제안했어. 각각에 대해 시장 경쟁력과 실현 가능성을 검증해줘."
-→ A의 아이디어 브리프 첨부
+[A's results to Agent B]
+"Agent A proposed the following ideas. Validate market competitiveness and feasibility for each."
+→ Attach A's idea briefs
 
-[A와 B의 토론 결과를 Agent C에게]
-"A와 B가 다음과 같이 분석하고 토론했어. 종합 판단하고 방향을 결정해줘."
-→ A-B 토론 요약 첨부
+[A and B's discussion results to Agent C]
+"A and B analyzed and discussed as follows. Synthesize and decide on the direction."
+→ Attach A-B discussion summary
+
+[When copy is needed — C to UX Writer]
+"We need onboarding copy for the chosen product. Here's the context: [product details, target user, voice requirements]."
+→ UX Writer delivers, C reviews
 ```

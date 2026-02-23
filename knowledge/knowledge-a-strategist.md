@@ -1,132 +1,132 @@
-# Knowledge Base — Agent A (시니어 프로덕트 전략가)
+# Knowledge Base — Agent A (Senior Product Strategist)
 
-## 1. 시장 분석 프레임워크
+## 1. Market Analysis Frameworks
 
 ### TAM / SAM / SOM
-- **TAM (Total Addressable Market)**: 전체 시장 규모 — "이 문제를 가진 모든 사람"
-- **SAM (Serviceable Addressable Market)**: 우리 제품이 실제로 도달할 수 있는 시장
-- **SOM (Serviceable Obtainable Market)**: 현실적으로 1-3년 내 확보 가능한 시장
-- **핵심 노하우**: 투자자와 대화할 때 TAM으로 꿈을 보여주되, 실행 계획은 SOM 기준으로 세워라. TAM이 크다고 무조건 좋은 게 아님 — 작은 SOM에서 지배적 위치를 확보하는 게 핵심.
+- **TAM (Total Addressable Market)**: Total market size — "everyone who has this problem"
+- **SAM (Serviceable Addressable Market)**: The market our product can actually reach
+- **SOM (Serviceable Obtainable Market)**: The market we can realistically capture within 1-3 years
+- **Key Expertise**: When talking to investors, show the dream with TAM, but build the execution plan based on SOM. A large TAM isn't always a good thing — the key is securing a dominant position in a small SOM.
 
-### Porter's Five Forces (경쟁 환경 분석)
-1. **기존 경쟁자 간 경쟁 강도**: 레드오션인가?
-2. **신규 진입자의 위협**: 진입 장벽이 높은가 낮은가?
-3. **대체재의 위협**: 고객이 다른 방식으로 문제를 해결할 수 있는가?
-4. **공급자의 교섭력**: 핵심 기술/인프라 제공자에 종속되는가?
-5. **구매자의 교섭력**: 고객의 전환 비용이 낮은가?
+### Porter's Five Forces (Competitive Environment Analysis)
+1. **Rivalry Among Existing Competitors**: Is it a red ocean?
+2. **Threat of New Entrants**: Are barriers to entry high or low?
+3. **Threat of Substitutes**: Can customers solve the problem in other ways?
+4. **Bargaining Power of Suppliers**: Are we dependent on key technology/infrastructure providers?
+5. **Bargaining Power of Buyers**: Are customer switching costs low?
 
-### Blue Ocean Strategy (블루오션 전략)
-- **가치 혁신(Value Innovation)**: 비용을 줄이면서 동시에 가치를 높이는 방법
-- **전략 캔버스**: 업계의 경쟁 요소를 축으로 놓고, 기존 플레이어와 우리의 차별화를 시각화
+### Blue Ocean Strategy
+- **Value Innovation**: How to reduce costs while simultaneously increasing value
+- **Strategy Canvas**: Visualize differentiation from existing players by plotting industry competitive factors on an axis
 - **4 Actions Framework**:
-  - **제거(Eliminate)**: 업계에서 당연시하지만 없어도 되는 것
-  - **감소(Reduce)**: 업계 수준 이하로 줄여도 되는 것
-  - **증가(Raise)**: 업계 수준 이상으로 올려야 하는 것
-  - **창조(Create)**: 업계에 없었지만 새로 만들어야 하는 것
+  - **Eliminate**: Things the industry takes for granted but can be removed
+  - **Reduce**: Things that can be reduced below the industry standard
+  - **Raise**: Things that should be raised above the industry standard
+  - **Create**: Things that never existed in the industry but should be newly created
 
 ### Jobs-to-be-Done (JTBD)
-- 고객은 "제품"을 사는 게 아니라 "해결해야 할 일(Job)"을 위해 고용(Hire)하는 것
-- **Functional Job**: 기능적으로 해결하려는 일
-- **Emotional Job**: 감정적으로 느끼고 싶은 것
-- **Social Job**: 사회적으로 보여주고 싶은 것
-- **핵심 노하우**: 고객 인터뷰에서 "왜 그 제품을 선택했나요?"보다 "그 제품을 처음 찾게 된 상황이 뭐였나요?"가 더 좋은 질문
+- Customers don't buy "products" — they hire them to get a "Job" done
+- **Functional Job**: The task they're trying to accomplish functionally
+- **Emotional Job**: What they want to feel emotionally
+- **Social Job**: What they want to project socially
+- **Key Expertise**: In customer interviews, "What was the situation when you first looked for that product?" is a better question than "Why did you choose that product?"
 
 ---
 
-## 2. 아이디어 발굴 노하우
+## 2. Idea Discovery Expertise
 
-### 기회 패턴 인식
-엑싯 경험에서 배운 반복되는 기회 패턴들:
+### Opportunity Pattern Recognition
+Recurring opportunity patterns learned from exit experiences:
 
-1. **기술의 민주화**: 비싼 기술이 저렴해지는 타이밍
-   - 예: 클라우드 → SaaS 폭발, AI API → AI-native 제품
-   - **Signal**: "전에는 큰 기업만 가능했는데 이제 누구나..."
+1. **Democratization of Technology**: When expensive technology becomes affordable
+   - Examples: Cloud → SaaS explosion, AI APIs → AI-native products
+   - **Signal**: "Before, only large companies could do this, but now anyone can..."
 
-2. **행동 변화의 파도 타기**: 사회적/기술적 변화가 새로운 행동을 만들 때
-   - 예: 모바일 → 모바일 퍼스트 서비스, 원격근무 → 협업 도구
-   - **Signal**: "요즘 사람들이 예전과 다르게..."
+2. **Riding the Wave of Behavioral Change**: When social/technological change creates new behaviors
+   - Examples: Mobile → mobile-first services, remote work → collaboration tools
+   - **Signal**: "These days, people are doing things differently than before..."
 
-3. **규제 변화의 틈새**: 새로운 규제가 만드는 기회
-   - 예: GDPR → 프라이버시 도구, 오픈뱅킹 → 핀테크
-   - **Signal**: "새로운 법/규제 때문에..."
+3. **Gaps Created by Regulatory Change**: Opportunities created by new regulations
+   - Examples: GDPR → privacy tools, open banking → fintech
+   - **Signal**: "Because of new laws/regulations..."
 
-4. **기존 산업의 소프트웨어화**: 아직 디지털 전환이 안 된 산업
-   - 예: 부동산, 건설, 농업, 물류
-   - **Signal**: "아직도 엑셀/종이로 하고 있다니..."
+4. **Software-ification of Traditional Industries**: Industries that haven't undergone digital transformation yet
+   - Examples: Real estate, construction, agriculture, logistics
+   - **Signal**: "I can't believe they're still using Excel/paper..."
 
-5. **번들링 ↔ 언번들링 사이클**
-   - 큰 플랫폼이 너무 비대해지면 → 특화 서비스가 뜨고 (언번들링)
-   - 특화 서비스가 너무 많아지면 → 통합 플랫폼이 뜬다 (번들링)
-   - **현재 사이클의 어느 위치인지 파악하는 것이 핵심**
+5. **Bundling ↔ Unbundling Cycle**
+   - When large platforms become too bloated → specialized services emerge (unbundling)
+   - When specialized services become too numerous → integrated platforms emerge (bundling)
+   - **The key is identifying where we are in the current cycle**
 
-### 아이디어 평가 직관 체크리스트
-엑싯 경험에서 검증된 "될 아이디어"의 공통점:
-- [ ] 사용자가 문제를 인지하고 있고, 이미 불완전한 해결책을 사용 중인가?
-- [ ] "왜 지금?"에 대한 명확한 답이 있는가? (기술/규제/행동 변화)
-- [ ] 첫 100명의 사용자를 어떻게 모을지 바로 떠오르는가?
-- [ ] 핵심 가치를 한 문장으로 설명할 수 있는가?
-- [ ] 만드는 사람(우리)이 이 문제를 깊이 이해하고 있는가?
-- [ ] 투자 없이도 초기 버전을 만들 수 있는가? (Bootstrappable)
-
----
-
-## 3. 비즈니스 모델 패턴
-
-### SaaS 모델
-- **Freemium**: 무료로 시작 → 유료 전환 (전환율 2-5% 정상)
-- **Usage-based**: 사용량 기반 과금 (예: API 호출, 스토리지)
-- **Seat-based**: 사용자 수 기반 과금
-- **Hybrid**: 기본료 + 사용량 추가 과금
-- **노하우**: 초기에는 단순한 프라이싱으로 시작. 복잡한 가격 구조는 성장 후에.
-
-### Marketplace 모델
-- **Commission**: 거래 수수료 (보통 5-20%)
-- **Listing fee**: 등록 수수료
-- **Subscription**: 판매자 월정액
-- **노하우**: 닭과 달걀 문제 해결이 핵심. 한쪽(보통 공급 측)을 먼저 확보하라.
-
-### 기타 모델
-- **Hardware + Software**: 하드웨어로 진입 → 소프트웨어로 수익
-- **Data monetization**: 데이터 수집 → 인사이트 판매
-- **Platform/API**: 인프라 제공 → 사용량 과금
+### Idea Evaluation Intuition Checklist
+Common traits of "ideas that work," validated through exit experiences:
+- [ ] Are users aware of the problem and already using incomplete solutions?
+- [ ] Is there a clear answer to "Why now?" (technology/regulation/behavioral change)
+- [ ] Can you immediately think of how to acquire the first 100 users?
+- [ ] Can the core value proposition be explained in one sentence?
+- [ ] Do the builders (us) deeply understand this problem?
+- [ ] Can an initial version be built without investment? (Bootstrappable)
 
 ---
 
-## 4. 타이밍 판단 노하우
+## 3. Business Model Patterns
 
-### "왜 지금인가?" 프레임워크
-성공적인 제품은 **아이디어가 좋아서**가 아니라 **타이밍이 맞아서** 성공하는 경우가 많다.
+### SaaS Model
+- **Freemium**: Start free → convert to paid (2-5% conversion rate is normal)
+- **Usage-based**: Charging based on usage (e.g., API calls, storage)
+- **Seat-based**: Charging based on number of users
+- **Hybrid**: Base fee + additional usage charges
+- **Expertise**: Start with simple pricing early on. Complex pricing structures come after growth.
 
-다음 조건 중 최소 2개 이상이 충족되어야 "지금이 타이밍":
-1. **기술 준비 완료**: 핵심 기술이 충분히 성숙하고 접근 가능
-2. **비용 구조 변화**: 이전에는 비쌌던 것이 저렴해짐
-3. **사용자 행동 변화**: 타겟 사용자의 습관이나 기대가 바뀜
-4. **규제 환경 변화**: 새로운 법/규제가 기회를 만듦
-5. **시장 공백**: 기존 플레이어가 변화에 대응 못하는 상황
+### Marketplace Model
+- **Commission**: Transaction fees (typically 5-20%)
+- **Listing fee**: Registration fees
+- **Subscription**: Monthly subscription for sellers
+- **Expertise**: Solving the chicken-and-egg problem is the key. Secure one side (usually the supply side) first.
 
-### 너무 이른 vs 적절한 타이밍 vs 너무 늦은
-- **너무 이름의 신호**: "개념은 좋은데 아직..." → 인프라, 습관, 비용 중 하나가 부족
-- **적절한 타이밍 신호**: "이미 불편하지만 좋은 대안이 없어" → 해킹, 엑셀, 수작업으로 해결 중
-- **너무 늦은 신호**: "이미 좋은 서비스가 3개 이상 있다" → 경쟁 과열
+### Other Models
+- **Hardware + Software**: Enter with hardware → monetize through software
+- **Data monetization**: Collect data → sell insights
+- **Platform/API**: Provide infrastructure → charge based on usage
 
 ---
 
-## 5. 엑싯 경험에서 배운 교훈
+## 4. Timing Judgment Expertise
 
-### 첫 번째 엑싯 (B2B SaaS)에서 배운 것
-- PMF를 찾기까지 3번의 피벗이 있었다 — 최초 아이디어에 집착하지 마라
-- 첫 10명의 고객이 제품을 만들었다 — 그들의 피드백이 제품의 방향을 잡아줌
-- "좋다"는 말보다 **"돈을 내겠다"**는 말이 진짜 검증
-- 경쟁자가 없는 시장은 시장이 없는 것일 수 있다
+### "Why Now?" Framework
+Successful products often succeed not because **the idea is great** but because **the timing is right**.
 
-### 두 번째 엑싯 (Consumer Tech)에서 배운 것
-- 바이럴리티는 설계하는 것이지 기도하는 것이 아니다
-- 리텐션이 성장보다 중요하다 — 새는 바가지에 물 붓기는 의미 없음
-- 투자 유치 타이밍: 트랙션이 보이기 시작할 때가 최적
-- 인수 협상에서 가장 중요한 것: 인수자에게 우리가 "왜 필요한지" 명확한 스토리
+At least 2 of the following conditions must be met for "now is the right time":
+1. **Technology is Ready**: Core technology is sufficiently mature and accessible
+2. **Cost Structure Has Changed**: What was previously expensive has become affordable
+3. **User Behavior Has Changed**: Target users' habits or expectations have shifted
+4. **Regulatory Environment Has Changed**: New laws/regulations create opportunities
+5. **Market Gap**: Existing players are failing to respond to change
 
-### 공통 교훈
-- **Speed > Perfection**: 80% 완성도로 빠르게 시장에 나가라
-- **Focus**: 한 번에 한 가지 핵심 문제만 해결하라
-- **Listen, but don't obey**: 고객의 말을 듣되, 그대로 따르지는 마라
-- **Team > Idea**: 좋은 팀이 평범한 아이디어를 살리고, 평범한 팀이 좋은 아이디어를 죽인다
+### Too Early vs. Right Timing vs. Too Late
+- **Signs of Too Early**: "The concept is great, but not yet..." → One of infrastructure, habits, or cost is lacking
+- **Signs of Right Timing**: "It's already painful but there's no good alternative" → People are solving it through hacks, Excel, or manual work
+- **Signs of Too Late**: "There are already 3 or more good services" → Competition is overheated
+
+---
+
+## 5. Lessons Learned from Exit Experiences
+
+### Lessons from the First Exit (B2B SaaS)
+- It took 3 pivots to find PMF — don't get attached to the original idea
+- The first 10 customers built the product — their feedback set the product's direction
+- **"I'll pay for it"** is real validation, not "That's nice"
+- A market with no competitors might mean there is no market
+
+### Lessons from the Second Exit (Consumer Tech)
+- Virality is designed, not prayed for
+- Retention is more important than growth — pouring water into a leaky bucket is pointless
+- Best timing for fundraising: when traction starts to show
+- The most important thing in acquisition negotiations: a clear story for the acquirer about "why they need us"
+
+### Common Lessons
+- **Speed > Perfection**: Get to market fast at 80% completion
+- **Focus**: Solve only one core problem at a time
+- **Listen, but don't obey**: Listen to customers, but don't follow them blindly
+- **Team > Idea**: A great team saves an average idea, and an average team kills a great idea
