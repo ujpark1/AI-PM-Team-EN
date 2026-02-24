@@ -58,6 +58,159 @@ PM Director가 관리하는 주요 업데이트 이력입니다.
 - **수정 파일**: `user-provider.tsx`, `account-info.tsx`, `sidebar-user-footer.tsx`
 - **교훈**: DB 스키마와 코드 간 컬럼명 일치 여부를 반드시 교차 검증
 
+### — [핵심 기능] Phase 2 Step 4: Security Scan Engine
+- **의사결정**: GuardRail의 핵심 기능. GitHub 퍼블릭 레포 → 8개 보안 체크 → 등급(A-F) → DB 저장 → UI 실제 데이터 연결
+- **아키텍처**: 4계층 (Scan Engine Core → API Routes → UI Wiring → DB)
+- **신규 모듈** (`src/lib/scan-engine/` — 6개 파일):
+  - `github-fetcher.ts` — GitHub REST API로 레포 파일 트리 + 내용 fetch. 관련 파일만 필터링 (최대 50개), 10개 동시 fetch. `GITHUB_PAT` 환경변수 옵션 지원
+  - `checks.ts` — 8개 보안 체크 함수 (순수 문자열 매칭, <100ms)
+    1. `stripe_key_exposed` (payment/critical) — Stripe 시크릿 키 노출
+    2. `webhook_no_verify` (payment/warning) — Webhook 서명 미검증
+    3. `password_plaintext` (auth/critical) — 비밀번호 평문 저장
+    4. `no_rate_limit` (auth/warning) — 로그인 Rate Limit 없음
+    5. `env_not_gitignored` (secrets/critical) — .env 파일 Git 미제외
+    6. `api_key_hardcoded` (secrets/critical) — API 키 하드코딩
+    7. `no_https` (infra/warning) — HTTPS 미설정
+    8. `no_privacy_policy` (legal/warning) — 프라이버시 정책 없음
+  - `grade-calculator.ts` — 등급 산출 (A=8/8, B=7/8+no critical, C=5-7, D=3-4, F=0-2 or ≥2 critical)
+  - `fix-guides.ts` — check_key별 양면(pass/fail) 가이드 콘텐츠. How to Fix 모달에 표시되는 "왜 위험한지", "어떻게 고치는지", AI 프롬프트 포함
+  - `transformer.ts` — DB 레코드(scans/scan_items) → UI 타입(ScanResult/ScanHistoryItem/DashboardStats) 변환
+- **API Routes** (3개):
+  - `POST /api/projects/[id]/scan` — 스캔 실행 파이프라인 (Auth → 소유권 → GitHub fetch → 체크 → 등급 → DB 저장 → 결과 반환)
+  - `GET /api/projects/[id]/scans` — 스캔 이력 목록 (limit 지원)
+  - `GET /api/projects/[id]/scans/[scanId]` — 스캔 상세 (scan_items + fix guides 포함)
+- **UI 연결** (7개 기존 파일 수정):
+  - `empty-no-scans.tsx` — URL 입력 + Scan 버튼 → API 연결, 로딩/에러 상태, 성공 시 결과 페이지 이동
+  - `dashboard/page.tsx` — `hasScans = false` 하드코딩 제거 → 실제 스캔 카운트 체크, Run Scan 버튼 API 연결
+  - `scan/[scanId]/page.tsx` — mock 데이터 → API fetch, Rescan 버튼 API 연결
+  - `scans/[scanId]/page.tsx` — mock 데이터 → API fetch, 하드코딩 `proj_1` → 동적 params
+  - `scans/page.tsx` — server component → client component, mock → API fetch
+  - `recent-scans.tsx` — mockRecentScans import 제거 → props 기반
+  - `stats-card.tsx` — mockStats import 제거 → props 기반 (Uptime/SSL은 "--" placeholder)
+- **제한 사항**: Public repo만 스캔 가능. GitHub OAuth(Step 3) 미구현으로 private repo 접근 불가
+- **다음 단계**: Step 3 (GitHub OAuth) 구현 → private repo 스캔 + 유저별 GitHub 연결
+- **검증**: `npx next build` 성공
+
+### — [모니터링] Phase 2 Step 6: URL 모니터링 — Vercel Cron
+- **의사결정**: Dashboard의 Uptime/SSL 카드가 "--"로 표시 중이던 것을 실제 데이터로 채움. Vercel Cron으로 6시간마다 모니터링, 매일 자동 재스캔.
+- **아키텍처**: Vercel Cron → API Route → Admin Supabase Client (RLS 우회) → monitoring_logs 테이블
+- **신규 파일** (8개):
+  - `vercel.json` — Cron 스케줄 (monitor 6시간, rescan 매일 03:00 UTC)
+  - `src/lib/supabase/admin.ts` — Service Role Key Supabase 클라이언트 (Cron은 유저 세션 없으므로 필수)
+  - `src/lib/monitoring/uptime.ts` — HTTP HEAD 체크 (상태코드 200-399 = up, 8초 타임아웃)
+  - `src/lib/monitoring/ssl.ts` — `https.request()` + `getPeerCertificate()` → 인증서 만료일 파싱
+  - `src/lib/monitoring/headers.ts` — 보안 헤더 6종 체크 (HSTS, CSP, X-Frame, X-Content-Type, Referrer-Policy, Permissions-Policy), 점수 0-100
+  - `src/app/api/cron/monitor/route.ts` — 통합 모니터링 (Uptime+SSL+Headers, 프로젝트별 3행 batch insert)
+  - `src/app/api/cron/rescan/route.ts` — 자동 재스캔 (기존 scan engine 재사용, source="auto", private repo 토큰 복호화)
+  - `src/app/api/projects/[id]/monitoring/route.ts` — 프로젝트별 최신 모니터링 데이터 조회
+- **수정 파일** (2개):
+  - `dashboard/page.tsx` — 모니터링 API fetch 추가, Uptime/SSL 실제 데이터 표시
+  - `stats-card.tsx` — Warning(주황)/Critical(빨강) 상태별 색상 추가
+- **보안**: `CRON_SECRET` Bearer 토큰으로 Cron 엔드포인트 인증
+- **환경변수**: `CRON_SECRET` — `.env.local` + Vercel (production, preview, development)
+- **검증**: `npx next build` 성공, Vercel 프로덕션 배포 완료
+
+### — [핵심 기능] Phase 2 Step 5: MCP Server (`guardrail-mcp` npm 패키지)
+- **의사결정**: Claude Code에서 직접 보안 스캔을 실행하고 결과를 확인할 수 있는 MCP 서버 구현. MVP는 Project Key 인증 (`GUARDRAIL_PROJECT_KEY` 환경변수 1개로 즉시 사용 가능)
+- **아키텍처**: Claude Code ←stdio→ guardrail-mcp (로컬 Node.js) → 로컬 파일 스캔 → 결과 POST → GuardRail API (Vercel)
+- **핵심 결정**:
+  - 로컬 스캔: GitHub가 아닌 로컬 디렉토리를 스캔 (push 전 체크 가능)
+  - 체크 로직 복사: scan-engine의 checks.ts, grade-calculator.ts를 MCP 패키지에 독립 복사 (npm publish 용이)
+  - API는 결과 저장만: MCP가 로컬에서 분석 완료 → API에 결과만 POST
+- **MCP 패키지** (`packages/guardrail-mcp/` — 9개 신규 파일):
+  - `index.ts` — McpServer + StdioServerTransport 진입점
+  - 4개 Tool: `guardrail_scan` (로컬 스캔), `guardrail_status` (상태), `guardrail_issues` (이슈), `guardrail_fix` (수정 가이드)
+  - `api-client.ts` — Bearer Project Key 인증 HTTP 클라이언트
+  - `local-scanner.ts` — fs.readdir recursive, 파일 필터링 (같은 로직), 최대 50개
+  - `checks.ts` + `grade.ts` — 8개 보안 체크 + 등급 계산 (scan-engine 복사)
+- **API 엔드포인트** (4개 신규 파일):
+  - `mcp-auth.ts` — Project Key SHA-256 해시 검증 (Admin Supabase Client, RLS 우회)
+  - `POST /api/mcp/scan` — 스캔 결과 수신 + scans/scan_items DB 저장 (source: "mcp")
+  - `GET /api/mcp/status` — 최신 등급 + 모니터링 데이터
+  - `GET /api/mcp/issues` — 실패 항목 + `?check_key=xxx` fix guide 상세
+- **UI 연결** (2개 수정):
+  - `mcp-connection.tsx` — 실제 project key prefix + 재생성 API + 동적 MCP config JSON
+  - `settings/page.tsx` — ProjectProvider에서 projectId/keyPrefix 전달
+- **사용자 플로우**: GuardRail 웹에서 프로젝트 생성 → Key 복사 → Claude Code에 알려주기(1회) → 이후 대화로 스캔/수정 무한반복
+- **이슈 해결**: MCP SDK `Server` vs `McpServer` — SDK v1.27.0에서 `.tool()` 메서드는 `McpServer` 클래스에만 존재
+- **검증**: MCP 패키지 빌드 + Next.js 빌드 모두 성공
+
+### — [핵심 기능] Phase 2 Step 7: SDK 런타임 모니터링 (`guardrail-sdk` npm 패키지)
+- **목적**: 사용자 앱이 실행되는 동안 실시간 위협(브루트포스, 이상 로그인, 트래픽 급증 등) 감지
+- **아키텍처**:
+  ```
+  사용자 앱 (guardrail-sdk 미들웨어)
+    → auth.login_failed / auth.login_success / api.request 이벤트 수집
+    → 30초마다 배치 POST /api/events
+    → Event Analyzer (서버) → 위협 감지 시 monitoring_logs에 alert 생성
+    → Dashboard에서 실시간 확인 + 액션 (Block IP, Was this you?)
+  ```
+- **이미 구현되어 있던 것 (이전 스텝에서):**
+  - API: `POST /api/events`, `GET /api/runtime/events`, `POST /api/runtime/block-ip`, `POST /api/runtime/acknowledge`, `GET /api/runtime/blocked-ips`, `POST /api/runtime/unblock-ip`
+  - Event Analyzer: `src/lib/event-analyzer/` (4개 감지기 + 오케스트레이터)
+  - DB: `runtime_events` 테이블, `projects.sdk_connected` 필드
+  - UI 컴포넌트 (mock): `runtime-events.tsx`, `runtime-event-dialog.tsx`, `sdk-setup-prompt.tsx`, `setup-sdk-dialog.tsx`
+- **이번에 구현한 것:**
+  - **SDK 패키지** (`packages/guardrail-sdk/` — 6개 파일):
+    - `types.ts` — SdkEvent, GuardrailConfig, FlushResponse 타입
+    - `collector.ts` — 이벤트 큐 + 30초 배치 전송 + blocked IP 관리 (API 실패 시 큐 유지)
+    - `index.ts` — Express 미들웨어 (`guardrail()`) — auth 엔드포인트 자동 감지, 차단 IP 403
+    - `next.ts` — Next.js 미들웨어 (`guardrailMiddleware()`)
+  - **UI 데이터 연결** (3개 수정):
+    - `project-provider.tsx` — `ProjectData`에 `sdk_connected: boolean` 추가
+    - `runtime-events.tsx` — mock 데이터 제거 → `GET /api/runtime/events` 실제 API 연결
+    - `dashboard/page.tsx` — `sdk_connected` 조건부 렌더링 (RuntimeEvents vs SdkSetupPrompt)
+  - **SDK 설치 타이밍 프롬프트** (4개 수정):
+    - `scan/[scanId]/page.tsx` — 스캔 결과 하단에 SdkSetupPrompt 추가 (sdk_connected=false일 때)
+    - `mcp-auth.ts` — `sdk_connected` 필드 select 추가 (McpProject 인터페이스 확장)
+    - `api/mcp/scan/route.ts` — 응답에 `sdkConnected` 필드 추가
+    - `guardrail-mcp/tools/scan.ts` — SDK 미연결 시 설치 안내 문구 출력
+- **설계 결정**:
+  - SDK 의존성 0개 (Node.js 내장 `fetch` 사용)
+  - Express: `res.end` 래핑으로 응답 상태코드 기반 login_failed/success 자동 감지
+  - Next.js: 미들웨어 특성상 응답 접근 불가 → API route에서 직접 이벤트 Push 권장
+  - SDK 안내 타이밍: 스캔 결과 확인 직후 = 보안 인식 최고조 시점
+- **검증**: SDK 빌드 + MCP 빌드 + Next.js 빌드 모두 성공
+
+### — [배포] npm 패키지 2종 + Vercel 프로덕션 배포 (2026-02-24)
+- **guardrail-sdk@0.1.0**: npm publish 완료
+  - Express 미들웨어 + Next.js 미들웨어
+  - 런타임 보안 모니터링 (브루트포스, 이상 로그인, 트래픽 급증 감지)
+  - URL: https://www.npmjs.com/package/guardrail-sdk
+- **guardrail-mcp@0.1.0**: npm publish 완료
+  - Claude Code MCP 서버 (4개 Tool: scan, status, issues, fix)
+  - `npx guardrail-mcp`로 즉시 실행 가능
+  - URL: https://www.npmjs.com/package/guardrail-mcp
+- **Vercel 웹 앱**: 프로덕션 배포 완료
+  - URL: https://guardrail-seven.vercel.app
+  - Step 7 UI 변경사항 포함 (RuntimeEvents 실제 데이터, SDK 안내 프롬프트)
+
+### — [핵심 기능] Phase 2 Step 3: GitHub OAuth (Private Repo 스캔 지원)
+- **의사결정**: 가입 방법(Google/Email/GitHub)과 무관하게 누구나 "Connect GitHub"로 private repo 스캔 가능
+- **아키텍처**: Supabase Auth의 GitHub 로그인과 별도 — 자체 GitHub OAuth App으로 repo 접근 토큰 발급 → AES-256-GCM 암호화 저장
+- **신규 파일** (7개):
+  - `src/lib/encryption.ts` — AES-256-GCM 암호화/복호화 (ENCRYPTION_KEY 환경변수)
+  - `src/app/api/auth/github/route.ts` — OAuth 시작 (CSRF state + GitHub 리다이렉트)
+  - `src/app/api/auth/github/callback/route.ts` — 콜백 (코드→토큰 교환 → 암호화 저장)
+  - `src/app/api/auth/github/popup-close/route.ts` — 팝업 닫기 (postMessage)
+  - `src/app/api/auth/github/disconnect/route.ts` — GitHub 연결 해제
+  - `src/app/api/github/repos/route.ts` — 사용자 레포 목록 (토큰 만료 자동 감지/삭제)
+  - `src/components/settings/connected-accounts.tsx` — 설정 페이지 GitHub 연결 카드
+- **수정 파일** (6개):
+  - `user-provider.tsx` — `github_username`, `github_connected_at`, `isGitHubConnected` 추가
+  - `new-project-dialog.tsx` — mock OAuth/repos → 실제 팝업 OAuth + API 레포 목록
+  - `github-fetcher.ts` — `token?` 파라미터 추가 (유저 토큰 > env PAT > 비인증 우선순위)
+  - `scan/route.ts` — 사용자 토큰 복호화 → fetchRepoFiles에 전달
+  - `settings/profile/page.tsx` — ConnectedAccounts 컴포넌트 추가
+  - `projects/route.ts` — `github_repo_id`, `github_repo_private` 필드 수용
+- **두 가지 OAuth 플로우**:
+  - Settings 페이지: 풀페이지 리다이렉트 (단순)
+  - New Project Dialog: 팝업 (다이얼로그 상태 유지, postMessage 통신)
+- **보안**: CSRF state 쿠키, AES-256-GCM 토큰 암호화, HttpOnly 쿠키, 토큰 만료 자동 감지
+- **Vercel 배포**: `ENCRYPTION_KEY` 환경변수 추가, 프로덕션 배포 완료
+- **검증**: `npx next build` 성공
+- **참고**: `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`는 GitHub OAuth App 생성 후 설정 필요
+
 ---
 
 ## 2026-02-23 (Phase 2 착수 전 리뷰)

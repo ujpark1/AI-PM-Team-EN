@@ -1088,6 +1088,19 @@ export { guardrailMiddleware as middleware } from 'guardrail-sdk/next'
 - "Block IP" / "Enable Rate Limiting" 버튼 → 실제 액션 (SDK 명령 전송)
 - SDK 연결 상태 → `projects.sdk_connected` 플래그
 
+**SDK 설치 안내 타이밍 (구현 위치별):**
+
+| 위치 | 조건 | 구현 파일 | 안내 방식 |
+|------|------|----------|----------|
+| 웹 스캔 결과 페이지 하단 | `sdk_connected = false` | `scan/[scanId]/page.tsx` | SDK setup prompt 카드 |
+| MCP `guardrail_scan` 결과 끝 | `sdk_connected = false` | `tools/scan.ts` | 텍스트: "Want real-time protection? Run guardrail_setup_sdk" |
+| Dashboard Overview | `sdk_connected = false` | `dashboard/page.tsx` | 기존 `sdk-setup-prompt.tsx` 카드 |
+| Project Settings | 항상 | `settings/page.tsx` | 기존 `setup-sdk-dialog.tsx` 섹션 |
+
+- 스캔 결과 확인 직후가 SDK 전환율 최고 타이밍 (보안 인식 피크)
+- 비침투적 카드/텍스트 형태만 사용 (모달 팝업 금지)
+- MCP에서는 `guardrail_setup_sdk` Tool 추가 필요 (SDK 설치 가이드 반환)
+
 **패키지 구조:**
 ```
 packages/guardrail-sdk/
@@ -1344,6 +1357,9 @@ packages/  (monorepo 또는 별도 repo)
 - [ ] **Step 10**: Vercel 배포 (초기 배포 완료, 최종 배포 대기)
 - [ ] **Step 11**: 법적 문서 (이용약관 + 개인정보처리방침)
 
+**Phase 3 — 이메일 알림:**
+- [ ] **Step 12**: 이메일 알림 (Resend 연동, DB 마이그레이션, 이메일 템플릿, Runtime + Monitoring 트리거, Settings 토글)
+
 ### Phase 2 구현 상세 — 완료된 항목
 
 **Step 0 — Supabase 인프라:**
@@ -1387,6 +1403,192 @@ packages/  (monorepo 또는 별도 repo)
 - `src/components/settings/delete-account.tsx` — 2단계 확인 + signOut
 - `src/app/(dashboard)/dashboard/page.tsx` — 실제 프로젝트 기반 상태 분기
 - Vercel 배포 완료 (`https://guardrail-seven.vercel.app`)
+
+---
+---
+
+# GuardRail Phase 3 — 이메일 알림 구현 계획
+
+## Context
+
+Phase 2에서 Runtime Event 감지(event-analyzer)와 URL 모니터링(Cron)이 완성되었다. 현재 위협/이상은 대시보드에서만 확인 가능. Phase 3에서는 **critical/warning 이벤트 발생 시 이메일 알림**을 추가하여 사용자가 대시보드를 보지 않아도 즉시 인지할 수 있게 한다.
+
+**스택 추가:** Resend (이메일 API — API 키 `.env.local`에 설정 완료)
+
+---
+
+## 구현 순서 (Step 12)
+
+### Step 12: F11 — 이메일 알림
+
+#### 12-1: Resend 패키지 설치
+
+```bash
+npm install resend
+```
+
+#### 12-2: DB 마이그레이션
+
+**`supabase/migrations/002_email_notifications.sql`:**
+
+```sql
+-- 프로젝트별 이메일 알림 on/off (기본 ON)
+alter table public.projects
+  add column email_alerts_enabled boolean default true;
+
+-- 이메일 발송 기록 (쿨다운 체크용)
+alter table public.monitoring_logs
+  add column email_sent_at timestamptz;
+```
+
+#### 12-3: 이메일 유틸리티 생성
+
+**`src/lib/email/send-alert.ts`:**
+
+```
+sendAlertEmail(projectId, logEntry) 함수:
+
+1. Admin Supabase 클라이언트로 조회:
+   - projects 테이블 → email_alerts_enabled, name
+   - projects.user_id → profiles 테이블 → auth.users.email
+
+2. email_alerts_enabled가 false면 → return (발송 안 함)
+
+3. 쿨다운 체크:
+   - monitoring_logs에서 동일 project_id + 동일 type + email_sent_at이
+     1시간 이내인 행이 있으면 → return (중복 방지)
+
+4. Resend API 호출:
+   - from: "GuardRail <alerts@guardrail.dev>"
+   - to: 사용자 이메일
+   - subject: "[프로젝트명] 알림 제목"
+   - html: buildAlertEmailHtml(데이터)
+
+5. 발송 성공 시:
+   - 해당 monitoring_logs 행의 email_sent_at = now() 업데이트
+```
+
+**`src/lib/email/templates.ts`:**
+
+```
+buildAlertEmailHtml(data) 함수:
+
+입력:
+- projectName: string
+- alertType: string (brute_force, traffic_spike, admin_access, uptime, ssl, header)
+- severity: "critical" | "warning"
+- message: string
+- details: Record<string, string> (IP, 시간, 위치 등)
+- dashboardUrl: string
+
+출력: 인라인 CSS HTML 이메일 문자열
+
+디자인:
+- 다크 헤더 (#18181b) + Guardrail 로고 (텍스트)
+- 심각도 배지: Critical = 빨강 #ed4242, Warning = 주황 #f59e0a
+- 프로젝트명 + 알림 제목
+- 상세 메시지 (무슨 일이 일어났는지)
+- Details 테이블 (key-value 쌍)
+- "View in Dashboard" CTA 버튼 (다크 배경)
+- 하단: "이 알림은 프로젝트 설정에서 끌 수 있습니다" 안내
+```
+
+#### 12-4: 기존 코드에 이메일 트리거 연동
+
+**A) Runtime Event Analyzer — `src/lib/event-analyzer/index.ts`:**
+
+위치: line ~158 (`await supabase.from("monitoring_logs").insert(logs)` 직후)
+
+```typescript
+// 이메일 알림 발송 (critical/warning만)
+for (const log of logs) {
+  if (log.status === "critical" || log.status === "warning") {
+    await sendAlertEmail(log.project_id, log);
+  }
+}
+```
+
+대상 이벤트:
+- brute_force (critical) → 이메일 O
+- admin_access (warning) → 이메일 O
+- traffic_spike (warning) → 이메일 O
+- new_location (ok) → 이메일 X (status "ok"이므로 자동 제외)
+
+**B) Monitoring Cron — `src/app/api/cron/monitor/route.ts`:**
+
+위치: line ~100 (`await supabase.from("monitoring_logs").insert(logs)` 직후)
+
+```typescript
+// 이메일 알림 발송 (critical/warning만)
+for (const log of logs) {
+  if (log.status === "critical" || log.status === "warning") {
+    await sendAlertEmail(project.id, log);
+  }
+}
+```
+
+대상:
+- 사이트 다운 (critical) → 이메일 O
+- SSL 무효 (critical) → 이메일 O
+- SSL 만료 임박 (warning) → 이메일 O
+- 보안 헤더 미흡 (warning/critical) → 이메일 O
+- 정상 (ok) → 이메일 X
+
+#### 12-5: Project Settings UI — Email Alerts 토글
+
+**`src/components/settings/general-settings.tsx`:**
+
+General Settings 카드 하단에 토글 추가:
+
+```
+Email Alerts          [ON/OFF 토글]
+Get notified when we detect
+security threats or monitoring issues.
+```
+
+동작:
+- 토글 변경 → `PATCH /api/projects/[id]` (email_alerts_enabled 필드)
+- 기존 name, url 저장과 동일 패턴
+
+#### 12-6: 프로젝트 API 수정
+
+**`src/app/api/projects/[id]/route.ts`:**
+
+PATCH 핸들러에 `email_alerts_enabled` 필드 추가 (기존 name, url과 동일하게 처리)
+
+---
+
+## Phase 3 파일 구조
+
+```
+src/lib/email/
+├── send-alert.ts              # NEW: 이메일 발송 유틸리티
+└── templates.ts               # NEW: HTML 이메일 템플릿
+
+supabase/migrations/
+└── 002_email_notifications.sql # NEW: DB 컬럼 추가
+
+수정 파일:
+├── package.json                        # resend 패키지 추가
+├── src/lib/event-analyzer/index.ts     # 이메일 트리거 추가
+├── src/app/api/cron/monitor/route.ts   # 이메일 트리거 추가
+├── src/components/settings/general-settings.tsx  # 토글 UI
+└── src/app/api/projects/[id]/route.ts  # PATCH에 email_alerts_enabled
+```
+
+---
+
+## Phase 3 검증 방법
+
+1. Supabase에서 마이그레이션 적용 확인 (projects 테이블에 email_alerts_enabled 컬럼)
+2. Project Settings에서 Email Alerts 토글 ON/OFF → DB 반영 확인
+3. 테스트: Runtime Event 발생 시 (brute_force) → Resend 대시보드에서 이메일 발송 로그 확인
+4. 테스트: Monitoring Cron 실행 시 (사이트 다운) → 이메일 발송 확인
+5. 쿨다운 테스트: 1시간 내 동일 이벤트 → 이메일 미발송 확인
+6. 토글 OFF 테스트: email_alerts_enabled = false → 이메일 미발송 확인
+7. `npm run build` 성공 확인
+
+---
 
 ### Phase 2 발견된 버그 및 수정
 
