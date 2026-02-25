@@ -77,7 +77,10 @@
     │   C(GTM Lead) + A(Positioning)       │
     │   B(Data Tracking Design & KPIs)     │
     │   D(Architecture & MVP Build)        │
-    │     ← Directed by C                 │
+    │   Design: UI/UX Design & Prototype   │
+    │   Design Review: Usability Check     │
+    │   UX Writing Review: Copy Audit      │
+    │     ← All directed by C             │
     └─────────────────────────────────────┘
                    │
                    ▼
@@ -91,6 +94,8 @@
     │          ▼                           │
     │   A(Next Opportunity) ← if needed    │
     │   D(Iteration & Tech Debt Mgmt)      │
+    │   Design Iteration ← from data       │
+    │   UX Writing Iteration ← from data   │
     └─────────────────────────────────────┘
 ```
 

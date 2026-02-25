@@ -122,11 +122,16 @@ Phase 4: Pre-Launch
   → A (Star, Strategist) handles positioning & messaging
   → B (Ann, Analyst) designs data tracking & KPIs
   → D (Dee, Developer) builds architecture & MVP
+  → Design work: UI/UX design & prototype (directed by Diro)
+  → Design review: Team reviews design for usability & consistency
+  → UX Writing review: Copy audit for tone, clarity & conversions
 
 Phase 5: Post-Launch
   → B (Ann, Analyst) analyzes data weekly
   → C (Diro, Director) interprets strategically
   → D (Dee, Developer) iterates based on evidence
+  → Design iteration: Update UI based on user feedback & data
+  → UX Writing iteration: Optimize copy based on performance data
   → Repeat as needed
 ```
 
