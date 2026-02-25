@@ -1,7 +1,7 @@
 # AI PM Team
 
 > **Turn any AI chatbot into a full product management team.**
-> A plug-and-play prompt system that gives you a Senior Strategist, Validation Analyst, Product Director, and UX Writer — each with deep domain knowledge and structured collaboration workflows.
+> A plug-and-play prompt system that gives you a Senior Strategist, Validation Analyst, Product Director, and Development Director — each with deep domain knowledge and structured collaboration workflows.
 
 ---
 
@@ -9,12 +9,14 @@
 
 This repo contains a set of **role-based AI agent prompts** and **knowledge bases** that simulate a high-functioning PM team. Instead of chatting with a generic AI, you get four specialized agents that think, debate, and decide like experienced product professionals.
 
-| Agent | Role | What They Do |
-|-------|------|-------------|
-| **A** — Strategist | Senior Product Strategist | Market analysis, blue ocean opportunity discovery, bold idea generation |
-| **B** — Analyst | Product Validation Analyst | Data-driven validation, competitive analysis, risk assessment, KPI design |
-| **C** — Director | Product Director | Final decisions, GTM strategy, launch execution, performance management |
-| **UX Writer** | AI UX Writer | Interface copy, voice design, UX content strategy, text audits |
+| Agent | Nickname | Role | What They Do |
+|-------|----------|------|-------------|
+| **A** — Strategist | **Star** | Senior Product Strategist | Market analysis, blue ocean opportunity discovery, bold idea generation |
+| **B** — Analyst | **Ann** | Product Validation Analyst | Data-driven validation, competitive analysis, risk assessment, KPI design |
+| **C** — Director | **Diro** | Product Director | Final decisions, GTM strategy, launch execution, performance management |
+| **D** — Developer | **Dee** | AI Development Director | Technical feasibility, system architecture, MVP build, deployment |
+
+> **Quick tip**: Use nicknames — **Star**, **Ann**, **Diro**, **Dee** — when referring to agents in conversations and prompts.
 
 ## Why Use This?
 
@@ -22,7 +24,7 @@ This repo contains a set of **role-based AI agent prompts** and **knowledge base
 Most AI conversations are freeform Q&A. This system forces **structured PM frameworks** into every interaction — TAM/SAM/SOM, JTBD, AARRR, RICE scoring, Retention curves, and 20+ more concepts are baked into each agent's decision-making.
 
 ### 2. Built-in Debate & Validation
-Agent A proposes bold ideas. Agent B stress-tests them. Agent C makes the call. This **adversarial collaboration** catches blind spots that a single AI conversation misses. You get the benefit of multiple perspectives without needing multiple people.
+Agent A (Star) proposes bold ideas. Agent B (Ann) stress-tests them. Agent C (Diro) makes the call. Agent D (Dee) builds it. This **adversarial collaboration** catches blind spots that a single AI conversation misses. You get the benefit of multiple perspectives without needing multiple people.
 
 ### 3. End-to-End Product Lifecycle
 Covers the full journey from **Discovery → Validation → Decision → Pre-Launch → Post-Launch**, with specific deliverables and handoff points at each phase. Not just ideation — all the way through launch and iteration.
@@ -30,8 +32,7 @@ Covers the full journey from **Discovery → Validation → Decision → Pre-Lau
 ### 4. Deep Knowledge, Not Surface-Level
 Each agent carries a dedicated knowledge base with real frameworks, not generic advice:
 - **23 core PM concepts** (PMF, Crossing the Chasm, Flywheel, Moat, Hook Model, Network Effects, etc.)
-- **Role-specific expertise** (A: exit lessons & timing judgment, B: unit economics & cohort analysis, C: GTM playbooks & pivot criteria)
-- **UX Writing principles** (voice design, component-specific patterns, 4-step editing filter)
+- **Role-specific expertise** (A: exit lessons & timing judgment, B: unit economics & cohort analysis, C: GTM playbooks & pivot criteria, D: full-stack development & system architecture)
 
 ### 5. Consistent Quality
 The prompts encode **specific output formats, decision frameworks, and constraints** so you get consistently high-quality deliverables every time — not random quality based on how you phrase your prompt.
@@ -74,25 +75,26 @@ Phase 3: Decision
   → C evaluates and makes Go/Pivot/Kill decision
 
 Phase 4: Pre-Launch
-  → C develops GTM strategy
-  → A handles positioning & messaging
-  → B designs data tracking & KPIs
-  → UX Writer creates product copy (delegated by C)
+  → C (Diro) develops GTM strategy
+  → A (Star) handles positioning & messaging
+  → B (Ann) designs data tracking & KPIs
+  → D (Dee) builds architecture & MVP
 
 Phase 5: Post-Launch
-  → B analyzes data weekly
-  → C interprets strategically
-  → Iterate based on evidence
+  → B (Ann) analyzes data weekly
+  → C (Diro) interprets strategically
+  → D (Dee) iterates based on evidence
+  → Repeat as needed
 ```
 
 ### Solo Mode (Single Agent)
 
 Don't need the full team? Each agent works independently too:
 
-- **Just need market analysis?** → Use Agent A alone
-- **Need to validate an idea?** → Use Agent B alone
-- **Making a product decision?** → Use Agent C alone
-- **Writing UI copy?** → Use the UX Writer alone
+- **Just need market analysis?** → Use Agent A (Star) alone
+- **Need to validate an idea?** → Use Agent B (Ann) alone
+- **Making a product decision?** → Use Agent C (Diro) alone
+- **Need to build an MVP?** → Use Agent D (Dee) alone
 
 ---
 
@@ -103,16 +105,15 @@ Don't need the full team? Each agent works independently too:
 ├── TEAM-OVERVIEW.md                       # Team structure & composition
 ├── WORKFLOW.md                            # Collaboration workflow guide
 ├── roles/
-│   ├── agent-a-strategist.md              # Strategist role + prompt
-│   ├── agent-b-analyst.md                 # Analyst role + prompt
-│   ├── agent-c-director.md                # Director role + prompt
-│   └── AI UX Writer.md                    # UX Writer role + prompt
+│   ├── agent-a-strategist.md              # Star — Strategist role + prompt
+│   ├── agent-b-analyst.md                 # Ann — Analyst role + prompt
+│   ├── agent-c-director.md                # Diro — Director role + prompt
+│   └── agent-d-developer.md              # Dee — Developer role + prompt
 └── knowledge/
     ├── knowledge-shared-fundamentals.md   # 23 core PM concepts (all agents)
     ├── knowledge-a-strategist.md          # Market analysis, idea discovery
     ├── knowledge-b-analyst.md             # Validation, data analysis
-    ├── knowledge-c-director.md            # Decision-making, GTM, growth
-    └── UX Writing Knowledge.md            # UX writing principles & patterns
+    └── knowledge-c-director.md            # Decision-making, GTM, growth
 ```
 
 ---
@@ -132,20 +133,21 @@ Don't need the full team? Each agent works independently too:
 
 ### Agent-Specific Knowledge
 
-- **Agent A**: Blue Ocean Strategy, Porter's Five Forces, timing judgment ("Why Now?" framework), exit lessons from B2B SaaS and Consumer Tech
-- **Agent B**: Lean Startup validation, The Mom Test, unit economics, event tracking design (AARRR-based), cohort/funnel/A/B test frameworks
-- **Agent C**: RAPID decision model, RICE/MoSCoW prioritization, PLG/SLG/CLG go-to-market playbooks, 30-60-90 day post-launch framework, pivot criteria
-- **UX Writer**: Voice chart design (6 linguistic variables), component-specific heuristics, 4-step editing filter (Purposeful → Concise → Conversational → Clear), inclusive design principles
+- **Agent A (Star)**: Blue Ocean Strategy, Porter's Five Forces, timing judgment ("Why Now?" framework), exit lessons from B2B SaaS and Consumer Tech
+- **Agent B (Ann)**: Lean Startup validation, The Mom Test, unit economics, event tracking design (AARRR-based), cohort/funnel/A/B test frameworks
+- **Agent C (Diro)**: RAPID decision model, RICE/MoSCoW prioritization, PLG/SLG/CLG go-to-market playbooks, 30-60-90 day post-launch framework, pivot criteria
+- **Agent D (Dee)**: Full-stack development (Next.js, React, TypeScript, Supabase), system architecture design, MVP build & deploy, technical risk management
 
 ---
 
 ## Tips for Best Results
 
 1. **Provide context** — The more specific your domain, constraints, and goals, the better the output
-2. **Let agents debate** — Feed A's output to B, then B's critique back to A. The back-and-forth produces the sharpest insights
-3. **Use C as the tiebreaker** — When A and B disagree, C synthesizes both views with a clear decision framework
-4. **Attach knowledge bases** — The prompts reference specific knowledge files. Include them for the best results
-5. **Iterate** — Run multiple rounds. The first pass is a starting point, not the final answer
+2. **Let agents debate** — Feed Star's output to Ann, then Ann's critique back to Star. The back-and-forth produces the sharpest insights
+3. **Use Diro as the tiebreaker** — When Star and Ann disagree, Diro synthesizes both views with a clear decision framework
+4. **Bring in Dee early** — Have Dee assess technical feasibility before the team commits to an idea
+5. **Attach knowledge bases** — The prompts reference specific knowledge files. Include them for the best results
+6. **Iterate** — Run multiple rounds. The first pass is a starting point, not the final answer
 
 ---
 
