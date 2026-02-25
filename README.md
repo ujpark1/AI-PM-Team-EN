@@ -105,10 +105,10 @@ Don't need the full team? Each agent works independently too:
 ├── TEAM-OVERVIEW.md                       # Team structure & composition
 ├── WORKFLOW.md                            # Collaboration workflow guide
 ├── roles/
-│   ├── agent-a-strategist.md              # Star — Strategist role + prompt
-│   ├── agent-b-analyst.md                 # Ann — Analyst role + prompt
-│   ├── agent-c-director.md                # Diro — Director role + prompt
-│   └── agent-d-developer.md              # Dee — Developer role + prompt
+│   ├── agent-a-star-strategist.md          # Star — Strategist role + prompt
+│   ├── agent-b-ann-analyst.md             # Ann — Analyst role + prompt
+│   ├── agent-c-diro-director.md           # Diro — Director role + prompt
+│   └── agent-d-dee-developer.md           # Dee — Developer role + prompt
 └── knowledge/
     ├── knowledge-shared-fundamentals.md   # 23 core PM concepts (all agents)
     ├── knowledge-a-strategist.md          # Market analysis, idea discovery

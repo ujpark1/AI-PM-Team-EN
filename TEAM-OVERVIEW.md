@@ -101,10 +101,10 @@ AI PM Team/
 ├── TEAM-OVERVIEW.md                    # This file — Team structure overview
 ├── WORKFLOW.md                         # Collaboration workflow guide
 ├── roles/
-│   ├── agent-a-strategist.md           # A (Star) role definition + AI prompt
-│   ├── agent-b-analyst.md              # B (Ann) role definition + AI prompt
-│   ├── agent-c-director.md             # C (Diro) role definition + AI prompt
-│   └── agent-d-developer.md            # D (Dee) role definition + AI prompt
+│   ├── agent-a-star-strategist.md      # A (Star) role definition + AI prompt
+│   ├── agent-b-ann-analyst.md          # B (Ann) role definition + AI prompt
+│   ├── agent-c-diro-director.md        # C (Diro) role definition + AI prompt
+│   └── agent-d-dee-developer.md        # D (Dee) role definition + AI prompt
 ├── knowledge/
 │   ├── knowledge-shared-fundamentals.md # Shared knowledge base (23 core PM concepts)
 │   ├── knowledge-a-strategist.md       # A's knowledge base (market analysis, idea discovery)
