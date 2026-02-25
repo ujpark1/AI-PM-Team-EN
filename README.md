@@ -60,30 +60,30 @@ Follow the phases in `WORKFLOW.md` for the complete experience:
 
 ```
 Phase 1: Discovery
-  → Give Agent A a market/domain to explore
-  → A brainstorms 3-5 ideas
-  → Feed A's output to Agent B for validation
-  → A & B debate and refine
+  → A (Star, Strategist) explores a market/domain
+  → A (Star) brainstorms 3-5 ideas
+  → Feed A's output to B (Ann, Analyst) for validation
+  → A (Star) & B (Ann) debate and refine
 
 Phase 2: Validation
-  → A does deep market analysis
-  → B does competitive & feasibility analysis
-  → A & B discuss, document consensus & disagreements
+  → A (Star, Strategist) does deep market analysis
+  → B (Ann, Analyst) does competitive & feasibility analysis
+  → A (Star) & B (Ann) discuss, document consensus & disagreements
 
 Phase 3: Decision
-  → Feed everything to Agent C
-  → C evaluates and makes Go/Pivot/Kill decision
+  → Feed everything to C (Diro, Director)
+  → C (Diro) evaluates and makes Go/Pivot/Kill decision
 
 Phase 4: Pre-Launch
-  → C (Diro) develops GTM strategy
-  → A (Star) handles positioning & messaging
-  → B (Ann) designs data tracking & KPIs
-  → D (Dee) builds architecture & MVP
+  → C (Diro, Director) develops GTM strategy
+  → A (Star, Strategist) handles positioning & messaging
+  → B (Ann, Analyst) designs data tracking & KPIs
+  → D (Dee, Developer) builds architecture & MVP
 
 Phase 5: Post-Launch
-  → B (Ann) analyzes data weekly
-  → C (Diro) interprets strategically
-  → D (Dee) iterates based on evidence
+  → B (Ann, Analyst) analyzes data weekly
+  → C (Diro, Director) interprets strategically
+  → D (Dee, Developer) iterates based on evidence
   → Repeat as needed
 ```
 
