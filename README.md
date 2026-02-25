@@ -39,20 +39,63 @@ The prompts encode **specific output formats, decision frameworks, and constrain
 
 ---
 
-## How to Use
+## Installation
 
-### Quick Start (5 minutes)
+### 1. Clone the Repo
+
+```bash
+git clone https://github.com/ujpark1/AI-PM-Team-EN.git
+cd AI-PM-Team-EN
+```
+
+### 2. Set Up in Your AI Tool
+
+#### Claude Code (CLI)
+
+Use the repo as your working directory. Reference agent files directly in your prompts:
+
+```bash
+# Navigate to the repo
+cd AI-PM-Team-EN
+
+# Start Claude Code and reference an agent
+claude
+
+# Then in Claude Code, say:
+# "Read roles/agent-a-star-strategist.md and knowledge/knowledge-a-strategist.md
+#  and knowledge/knowledge-shared-fundamentals.md.
+#  Act as Agent A (Star). I want to explore the AI fitness market."
+```
+
+You can also add the agent prompts to your `CLAUDE.md` file for persistent context:
+
+```bash
+# Copy the system prompt from any agent file into your project's CLAUDE.md
+# Claude Code will automatically use it in every conversation
+```
+
+#### Claude (Web — Projects)
+
+1. Create a new **Project** at [claude.ai](https://claude.ai)
+2. Upload the agent's role file (e.g., `agent-a-star-strategist.md`) as **Project Knowledge**
+3. Upload the matching knowledge file (e.g., `knowledge-a-strategist.md`) and `knowledge-shared-fundamentals.md`
+4. Copy the prompt from the "AI Agent Prompt" section and paste it as the **Project Instructions**
+5. Start chatting
+
+#### ChatGPT (Custom GPTs or System Prompt)
+
+1. Go to **Explore GPTs → Create**
+2. Paste the agent's system prompt into the **Instructions** field
+3. Upload the knowledge files under **Knowledge**
+4. Save and start using
+
+#### Any Other LLM
 
 1. **Pick an agent** from the `roles/` folder
 2. **Copy the prompt** from the "AI Agent Prompt" section in the markdown file
-3. **Paste it as a system prompt** (or first message) in your AI tool of choice
+3. **Paste it as a system prompt** (or first message) in your LLM of choice
 4. **Attach the knowledge base** from the `knowledge/` folder as context
 5. **Start working**
-
-### Recommended AI Tools
-- **Claude** (Projects or plain chat)
-- **ChatGPT** (Custom GPTs or system prompt)
-- **Any LLM** that supports system prompts or long context
 
 ### Full Team Workflow
 
